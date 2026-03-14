@@ -1,0 +1,9 @@
+{
+  "name": "claude-teacher",
+  "description": "The most attentive AI tutor — teaches by guiding, tracks knowledge gaps, quizzes periodically, and adapts to your level",
+  "version": "1.0.0",
+  "author": {
+    "name": "Yaroslav"
+  },
+  "keywords": ["education", "teaching", "tutor", "quiz", "learning"]
+}
