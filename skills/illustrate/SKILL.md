@@ -138,6 +138,7 @@ Create ASCII art diagrams with detailed educational explanations. All output is 
 
 This skill is part of the **claude-teacher** plugin:
 
-- **`/teach-mode`** — will invoke illustrate when visual explanation helps. After illustrating, offer to save the diagram to `docs/`.
 - **`/quiz-me`** — if a student gets a visual concept wrong during a quiz, suggest illustrating it.
+- **`/challenge`** — challenges may need diagrams as part of the answer.
 - Diagrams saved to `docs/` become the student's personal reference library.
+- The tutor (via CLAUDE.md) will suggest `/illustrate` when visual explanation helps.

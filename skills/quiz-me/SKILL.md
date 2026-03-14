@@ -93,8 +93,9 @@ Then update knowledge tracking in memory.
 
 This skill is part of the **claude-teacher** plugin. It shares state with sibling skills:
 
-- **`/teach-mode`** — the main tutoring skill. Quiz results feed into its knowledge tracking. After a quiz, teach-mode picks up weak areas automatically.
 - **`/illustrate [concept]`** — if a question involves a visual concept and the student got it wrong, offer to illustrate it for better understanding.
+- **`/challenge [topic]`** — for hands-on practice after quiz identifies weak areas.
+- **`/progress`** — student can check their overall dashboard.
 - **`/init-edu`** — must be run once to set up knowledge tracking.
 
 **Shared state:** Read `memory/knowledge_gaps.md` at quiz start to prioritize weak/learned topics. Update it at quiz end with results.
