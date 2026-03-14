@@ -173,9 +173,10 @@ Teaching mode is **always on** once initialized — no need to activate it each 
 - Check your knowledge profile at session start
 - Review weak topics before teaching new ones
 - Quiz you every 2-3 concepts
+- Research topics via web search before explaining — provides source links
 - Suggest `/illustrate` for visual topics
 - Adapt difficulty in real time
-- Offer to save explanations to `docs/`
+- Automatically save explanations to `docs/` for future reference
 
 ## Example Workflow
 
@@ -196,6 +197,14 @@ Day 3:
   /illustrate active vs passive FTP
   /summary                     → ready for the next chapter
 ```
+
+## Updating
+
+```bash
+claude plugins update claude-teacher
+```
+
+If you installed from a specific marketplace, the update pulls the latest version from the same source.
 
 ## Uninstall
 

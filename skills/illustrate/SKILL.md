@@ -119,12 +119,14 @@ Create ASCII art diagrams with detailed educational explanations. All output is 
    - Standardize box widths where possible
    - Center vertical connectors under boxes
    - Break complex concepts into multiple smaller diagrams
-4. **Write educational explanation:**
+4. **Research the concept** using WebSearch before creating the diagram — verify accuracy against official docs, RFCs, or standards. Include source links.
+5. **Write educational explanation:**
    - **What it shows** — walk through the diagram
    - **Why it works this way** — reasoning behind the design
    - **Key concepts** — define terms that might be new
    - **Common pitfalls** — what people often misunderstand
-   - **Further reading** — relevant RFCs, docs, or standards when applicable
+   - **Sources** — links to official docs, RFCs, or standards used
+6. **Save to docs/** — automatically save the diagram and explanation to `docs/<concept-name>.md` for future reference.
 
 ## Quality Rules
 
