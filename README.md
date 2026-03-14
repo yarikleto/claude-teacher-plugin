@@ -200,11 +200,13 @@ Day 3:
 
 ## Updating
 
+From the project where the plugin is installed:
+
 ```bash
-claude plugins update claude-teacher --scope project
+claude plugins update claude-teacher@claude-teacher-marketplace --scope project
 ```
 
-Use the same `--scope` you used during install (`project`, `user`, or `local`). The update pulls the latest version from the marketplace. Restart the session after updating.
+Use the same `--scope` you used during install (`project`, `user`, or `local`). Restart the session after updating.
 
 ## Uninstall
 
