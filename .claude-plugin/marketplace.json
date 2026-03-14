@@ -1,0 +1,16 @@
+{
+  "name": "claude-teacher-marketplace",
+  "owner": {
+    "name": "yarikleto"
+  },
+  "plugins": [
+    {
+      "name": "claude-teacher",
+      "description": "The most attentive AI tutor — teaches, tracks knowledge, quizzes, and adapts to your level",
+      "source": {
+        "source": "github",
+        "repo": "yarikleto/claude-teacher-plugin"
+      }
+    }
+  ]
+}
