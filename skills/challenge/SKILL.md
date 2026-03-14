@@ -14,9 +14,10 @@ Generates a short, focused exercise on the current topic. Adapts to the learning
 
 ## Process
 
-1. Read `memory/knowledge_gaps.md` — prefer topics from Weak or Learned
-2. Check CLAUDE.md for learning type (project / technology / theory)
-3. Generate ONE challenge appropriate to the type
+1. Read `memory/knowledge_gaps.md` — ONLY use topics from Weak, Learned, or Solid sections
+2. **NEVER generate challenges on topics from "Not Yet Covered"** — the student hasn't learned them yet. If no covered topics exist, say: "Nothing to challenge on yet — let's learn something first!"
+3. Check CLAUDE.md for learning type (project / technology / theory)
+4. Generate ONE challenge appropriate to the type
 4. Wait for the student's answer
 5. Evaluate, explain, update knowledge tracking
 
