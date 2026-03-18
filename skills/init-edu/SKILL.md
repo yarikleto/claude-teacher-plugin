@@ -15,9 +15,23 @@ Sets up any project or study folder for learning mode. Configures Claude as a pe
 mkdir -p ~/.local/share/claude-education/{docs,topics,quizzes,sessions}
 ```
 
-Read `~/.local/share/claude-education/student.json`. If it doesn't exist, this is a brand new student — ask the onboarding questions in Step 2. If it exists, skip to Step 3 — greet the returning student by name/context.
+Read `~/.local/share/claude-education/student.json`. If it doesn't exist, this is a brand new student — ask the onboarding questions in Step 2. If it exists, greet the returning student by name and ask:
 
-### Step 2: Student Onboarding (first time only)
+```
+Welcome back, {name}! Your profile is already set up. What would you like to do?
+
+  a) Set up this project for learning (keep my profile as is)
+  b) Update my profile (change name, interests, goals, etc.)
+  c) Full reset — start fresh (wipes profile, keeps learning progress)
+  d) Complete reset — wipe everything (profile + all progress)
+```
+
+- **Option a)** → skip to Step 3 (project setup)
+- **Option b)** → show current profile values, ask which fields to change, update `student.json` and the Student Profile section in CLAUDE.md
+- **Option c)** → delete `student.json`, re-run onboarding (Step 2). Keep `dashboard.json`, `topics/`, `quizzes/`, `sessions/` intact.
+- **Option d)** → confirm with "Are you sure? This deletes all your learning history." If confirmed, delete the entire `~/.local/share/claude-education/` directory and start fresh from Step 2.
+
+### Step 2: Student Onboarding (first time or reset)
 
 This is the most important step — a good student profile makes everything else work better. Ask in a friendly, conversational way. Don't dump all questions at once — go through them naturally.
 

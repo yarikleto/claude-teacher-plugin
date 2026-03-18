@@ -390,6 +390,23 @@ Day 3:
   /summary                     → 7 topics solid, ready for next chapter
 ```
 
+## Re-initialization
+
+Made a mistake during setup? Just run `/init-edu` again. If you already have a profile, it will ask:
+
+```
+Welcome back! What would you like to do?
+
+  a) Set up this project for learning (keep my profile)
+  b) Update my profile (change name, interests, goals, etc.)
+  c) Full reset — start fresh (wipes profile, keeps learning progress)
+  d) Complete reset — wipe everything (profile + all progress)
+```
+
+- **Update profile** — change specific fields (name, interests, goals) without losing anything
+- **Full reset** — re-do onboarding from scratch, but keep all your quiz history and topic progress
+- **Complete reset** — nuclear option, deletes everything and starts over
+
 ## Updating
 
 From the project where the plugin is installed:
