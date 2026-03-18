@@ -8,6 +8,11 @@ if [ ! -f "$HOME/.local/share/claude-education/dashboard.json" ]; then
   exit 0
 fi
 
+# Only fire in learning projects (must have memory/knowledge_gaps.md)
+if [ ! -f "memory/knowledge_gaps.md" ]; then
+  exit 0
+fi
+
 # If /summary or /save-progress already ran this session, skip
 LAST_MSG=$(printf '%s' "$INPUT" | jq -r '.last_assistant_message // ""' 2>/dev/null)
 if printf '%s' "$LAST_MSG" | grep -qi "SESSION SUMMARY\|Progress Saved\|session_end"; then
