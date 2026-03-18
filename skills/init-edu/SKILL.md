@@ -132,17 +132,76 @@ What's the topic? (e.g., "FTP server with C++ sockets", "Apache Kafka", "sorting
 
 ### Step 4: Configure Claude Settings
 
-Create or update `.claude/settings.json` — merge `outputStyle`, do NOT overwrite existing settings:
-
-```json
-{
-  "outputStyle": "Explanatory"
-}
-```
+Create or update `.claude/settings.json` — merge `outputStyle` and `hooks`, do NOT overwrite existing settings:
 
 ```bash
 mkdir -p .claude
 ```
+
+Find the plugin's installed hooks directory. It will be inside the plugin installation path under `hooks/`. Use this to resolve absolute paths for the hook scripts:
+
+```bash
+PLUGIN_DIR=$(find ~/.claude -path "*/claude-teacher-plugin/hooks" -type d 2>/dev/null | head -1)
+# Fallback for profile-based installs
+[ -z "$PLUGIN_DIR" ] && PLUGIN_DIR=$(find ~/.local/share -path "*/claude-teacher-plugin/hooks" -type d 2>/dev/null | head -1)
+```
+
+Merge into `.claude/settings.json`:
+
+```json
+{
+  "outputStyle": "Explanatory",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "<PLUGIN_DIR>/session-start-load-db.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "<PLUGIN_DIR>/stop-save-progress.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "<PLUGIN_DIR>/post-code-review.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "<PLUGIN_DIR>/post-quiz-motivate.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Replace `<PLUGIN_DIR>` with the actual resolved path from above. If the hooks directory cannot be found, skip hooks setup and inform the student they can add hooks manually later.
 
 ### Step 5: Create CLAUDE.md
 
