@@ -45,20 +45,17 @@ Ask in this exact order, one at a time:
 
 1. `Hey! Before we start, I'd love to get to know you a bit. What's your name? (or what should I call you?)`
 2. `How old are you?`
-3. `What language would you like to communicate in? (I'll use it for everything — explanations, questions, feedback)`
-4. `What's your background? (student, self-taught, professional, switching fields...)`
-5. `What's your current level in the subject you want to study? (complete beginner / some experience / intermediate / advanced)`
-6. `What do you already know well? (subjects, skills, fields — anything relevant)`
-7. `How do you learn best? Pick all that apply: a) Visual diagrams  b) Examples first, then theory  c) Analogies to things I know  d) Theory first, then practice  e) Just throw me in  f) Mix of everything`
-8. `What frustrates you when learning? (e.g., "too much theory", "going too fast", "being talked down to", "not enough practice")`
-9. `What motivates you? (e.g., "understanding how things work", "applying it to real life", "passing an exam", "career change")`
-10. `Any specific goals or deadlines? (e.g., "understand personal finance by year end", "pass math exam in June", "build a project by summer")`
-11. `How much time can you dedicate? (e.g., "1 hour/day", "weekends only", "full-time")`
-12. `Last one — anything else I should know? Hobbies, interests, things you like or dislike? (I'll use these for analogies and examples)`
+3. `What's your background? (student, self-taught, professional, switching fields...)`
+4. `What's your current level in the subject you want to study? (complete beginner / some experience / intermediate / advanced)`
+5. `What do you already know well? (subjects, skills, fields — anything relevant)`
+6. `How do you learn best? Pick all that apply: a) Visual diagrams  b) Examples first, then theory  c) Analogies to things I know  d) Theory first, then practice  e) Just throw me in  f) Mix of everything`
+7. `What frustrates you when learning? (e.g., "too much theory", "going too fast", "being talked down to", "not enough practice")`
+8. `What motivates you? (e.g., "understanding how things work", "applying it to real life", "passing an exam", "career change")`
+9. `Any specific goals or deadlines? (e.g., "understand personal finance by year end", "pass math exam in June", "build a project by summer")`
+10. `How much time can you dedicate? (e.g., "1 hour/day", "weekends only", "full-time")`
+11. `Last one — anything else I should know? Hobbies, interests, things you like or dislike? (I'll use these for analogies and examples)`
 
-Wait for all answers. **From this point on, communicate with the student in the language they specified in question 3. Use it for all explanations, questions, feedback, and quizzes — for the rest of this session and all future sessions.**
-
-Then save to `~/.local/share/claude-education/student.json`:
+Wait for all answers. Then save to `~/.local/share/claude-education/student.json`:
 ```json
 {
   "name": "{name}",

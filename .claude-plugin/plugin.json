@@ -1,7 +1,7 @@
 {
   "name": "claude-teacher",
   "description": "The most attentive AI tutor — teaches any subject by guiding, tracks knowledge gaps, quizzes with spaced repetition, and adapts to your level",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "author": {
     "name": "Yaroslav"
   },
