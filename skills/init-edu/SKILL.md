@@ -15,7 +15,11 @@ Sets up any project or study folder for learning mode. Configures Claude as a pe
 mkdir -p ~/.local/share/claude-education/{docs,topics,quizzes,sessions}
 ```
 
-Read `~/.local/share/claude-education/student.json`. If it doesn't exist, this is a brand new student — ask the onboarding questions in Step 2. If it exists, greet the returning student by name and ask:
+Read `~/.local/share/claude-education/student.json`.
+
+**CRITICAL: If `student.json` does not exist → go to Step 2 immediately. Do NOT skip to Step 3. Do NOT check CLAUDE.md yet. The student profile MUST be collected before anything else.**
+
+If `student.json` exists, greet the returning student by name and ask:
 
 ```
 Welcome back, {name}! Your profile is already set up. What would you like to do?
@@ -33,7 +37,7 @@ Welcome back, {name}! Your profile is already set up. What would you like to do?
 
 ### Step 2: Student Onboarding (first time or reset)
 
-This is the most important step — a good student profile makes everything else work better. Ask in a friendly, conversational way. Don't dump all questions at once — go through them naturally.
+This is the most important step — a good student profile makes everything else work better. Ask in a friendly, conversational way. **Ask one part at a time, wait for the answer, then continue.** Never show all questions at once.
 
 **Part A — Who are you?**
 ```
@@ -127,9 +131,9 @@ Wait for all answers. Then save to `~/.local/share/claude-education/student.json
 
 ### Step 3: Ask Learning Type
 
-Ask TWO questions:
+Ask Question 1 and STOP. Wait for the student's answer before continuing.
 
-**Question 1:**
+**Question 1 — ask this alone, then wait for answer:**
 ```
 What type of learning is this?
 
@@ -139,7 +143,9 @@ What type of learning is this?
   d) Mixed / other
 ```
 
-**Question 2:**
+Only after they answer Question 1, ask Question 2:
+
+**Question 2 — ask only after Question 1 is answered:**
 ```
 What's the topic? (e.g., "FTP server with C++ sockets", "Apache Kafka", "sorting algorithms")
 ```
