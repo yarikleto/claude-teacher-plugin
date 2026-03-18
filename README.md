@@ -254,9 +254,9 @@ The plugin includes 4 hooks that automate the teaching workflow. Configured auto
 
 | Type | Example | Claude focuses on |
 |------|---------|-------------------|
-| **Project** | FTP server, todo app | Code skeletons, incremental building, pedagogical code review |
-| **Technology** | Kafka, Docker, K8s | Architecture, real-world scenarios, "when to use / not use" |
-| **Theory** | Algorithms, OS, networking | Intuition first, formal definitions, thought experiments, problems |
+| **Project** | FTP server, budget tracker, game | Skeletons, incremental building, hands-on review |
+| **Subject / field** | Finance, psychology, math, CS | Concepts, real-world scenarios, comparisons, "why it matters" |
+| **Exam prep** | OS exam, job interview, certification | Key concepts, practice questions, weak spots, timed drills |
 
 ---
 

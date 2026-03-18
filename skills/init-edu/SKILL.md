@@ -46,16 +46,15 @@ Ask in this exact order, one at a time:
 1. `Hey! Before we start, I'd love to get to know you a bit. What's your name? (or what should I call you?)`
 2. `How old are you?`
 3. `What's your native language?`
-4. `What's your background? (CS degree, self-taught, switching careers, student...)`
-5. `What's your current level in programming? (beginner / intermediate / advanced)`
-6. `What technologies or languages do you already know well?`
-7. `What have you tried learning before that didn't stick? (so I can avoid the same approach)`
-8. `How do you learn best? Pick all that apply: a) Visual diagrams  b) Code examples — show me, then I try  c) Analogies to real life  d) Theory first, then practice  e) Just throw me in  f) Mix of everything`
-9. `What frustrates you when learning? (e.g., "too much theory", "going too fast", "being talked down to")`
-10. `What motivates you? (e.g., "building real things", "getting a job", "understanding how stuff works")`
-11. `Any specific goals or deadlines? (e.g., "pass OS exam by June", "build a portfolio project by summer")`
-12. `How much time can you dedicate? (e.g., "1 hour/day", "weekends only", "full-time")`
-13. `Last one — anything else I should know? Hobbies, interests, things you like or dislike? (I'll use these for analogies)`
+4. `What's your background? (student, self-taught, professional, switching fields...)`
+5. `What's your current level in the subject you want to study? (complete beginner / some experience / intermediate / advanced)`
+6. `What do you already know well? (subjects, skills, fields — anything relevant)`
+7. `How do you learn best? Pick all that apply: a) Visual diagrams  b) Examples first, then theory  c) Analogies to things I know  d) Theory first, then practice  e) Just throw me in  f) Mix of everything`
+8. `What frustrates you when learning? (e.g., "too much theory", "going too fast", "being talked down to", "not enough practice")`
+9. `What motivates you? (e.g., "understanding how things work", "applying it to real life", "passing an exam", "career change")`
+10. `Any specific goals or deadlines? (e.g., "understand personal finance by year end", "pass math exam in June", "build a project by summer")`
+11. `How much time can you dedicate? (e.g., "1 hour/day", "weekends only", "full-time")`
+12. `Last one — anything else I should know? Hobbies, interests, things you like or dislike? (I'll use these for analogies and examples)`
 
 Wait for all answers. Then save to `~/.local/share/claude-education/student.json`:
 ```json
@@ -112,17 +111,17 @@ Ask Question 1 and STOP. Wait for the student's answer before continuing.
 ```
 What type of learning is this?
 
-  a) Building a project (FTP server, todo app, game...)
-  b) Studying a technology (Kafka, Docker, Kubernetes...)
-  c) Learning theory (algorithms, OS, networking, CS fundamentals...)
-  d) Mixed / other
+  a) Building a project (app, tool, game, portfolio...)
+  b) Studying a subject or field (finance, psychology, math, history, CS...)
+  c) Preparing for something (exam, interview, certification, presentation...)
+  d) Mixed / not sure yet
 ```
 
 Only after they answer Question 1, ask Question 2:
 
 **Question 2 — ask only after Question 1 is answered:**
 ```
-What's the topic? (e.g., "FTP server with C++ sockets", "Apache Kafka", "sorting algorithms")
+What's the topic? (e.g., "personal finance", "linear algebra", "machine learning", "FTP server in C++")
 ```
 
 ### Step 4: Configure Claude Settings
