@@ -214,6 +214,25 @@ Full DB flush: updates topics, dashboard, session log. Shows depth transitions, 
 
 Quick save without ending the session. Use anytime you want a safety checkpoint.
 
+### `/reset-edu` — Delete All Data
+
+Wipes everything: profile, quiz history, topic progress, session logs, saved docs. Asks for confirmation before deleting.
+
+```
+> /reset-edu
+
+This will permanently delete:
+  · Your student profile (name, goals, learning style)
+  · All quiz history and scores
+  · All topic progress and misconceptions
+  · All session logs
+  · All saved explanations
+
+Are you sure? Type YES to confirm.
+```
+
+Run `/init-edu` afterward to start fresh.
+
 ---
 
 ## Hooks
