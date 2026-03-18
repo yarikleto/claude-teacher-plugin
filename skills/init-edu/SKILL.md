@@ -37,58 +37,25 @@ Welcome back, {name}! Your profile is already set up. What would you like to do?
 
 ### Step 2: Student Onboarding (first time or reset)
 
-This is the most important step — a good student profile makes everything else work better. Ask in a friendly, conversational way. **Ask one part at a time, wait for the answer, then continue.** Never show all questions at once.
+This is the most important step — a good student profile makes everything else work better.
 
-**Part A — Who are you?**
+**STRICT RULE: Ask exactly ONE question, then STOP and wait for the answer. Do not show the next question until the student has replied. Never group questions.**
 
-Start with just this one question, wait for the answer, then continue with the rest:
-```
-Hey! Before we start, I'd love to get to know you a bit so I can teach you the way that works best for you.
+Ask in this exact order, one at a time:
 
-What's your name? (or what should I call you?)
-```
-
-After they answer, ask the next two together:
-```
-Nice to meet you, {name}!
-
-2. How old are you? (helps me pick the right examples and analogies)
-3. What's your native language? (I can explain tricky terms in your language if needed)
-```
-
-**Part B — Your background**
-```
-4. What's your background? (CS degree, self-taught, switching from another field, student...)
-5. What's your current level in programming? (beginner, intermediate, advanced)
-6. What technologies/languages do you already know well? (so I can build on what you know)
-7. What have you tried learning before that didn't stick? (so I avoid the same approach)
-```
-
-**Part C — How you learn**
-```
-8. How do you learn best? Pick all that apply:
-   a) Visual diagrams and drawings
-   b) Code examples — show me, then I'll try
-   c) Analogies to real life
-   d) Formal definitions and theory first
-   e) Just throw me in and I'll figure it out
-   f) Mix of everything
-
-9. What frustrates you when learning? (e.g., "too much theory", "not enough practice", "going too fast", "being talked down to")
-10. What motivates you? (e.g., "building real things", "understanding how things work", "getting a job", "passing exams")
-```
-
-**Part D — Goals**
-```
-11. Any specific learning goals or deadlines? (e.g., "pass OS exam by June", "build portfolio project by summer")
-12. How much time can you dedicate? (e.g., "1 hour/day", "weekends only", "intensive full-time")
-```
-
-**Part E — Preferences**
-```
-13. Anything else I should know? Things you like, don't like, hobbies, interests?
-    (I'll use these for analogies and examples — e.g., if you like gaming, I'll explain threads using game engines)
-```
+1. `Hey! Before we start, I'd love to get to know you a bit. What's your name? (or what should I call you?)`
+2. `How old are you?`
+3. `What's your native language?`
+4. `What's your background? (CS degree, self-taught, switching careers, student...)`
+5. `What's your current level in programming? (beginner / intermediate / advanced)`
+6. `What technologies or languages do you already know well?`
+7. `What have you tried learning before that didn't stick? (so I can avoid the same approach)`
+8. `How do you learn best? Pick all that apply: a) Visual diagrams  b) Code examples — show me, then I try  c) Analogies to real life  d) Theory first, then practice  e) Just throw me in  f) Mix of everything`
+9. `What frustrates you when learning? (e.g., "too much theory", "going too fast", "being talked down to")`
+10. `What motivates you? (e.g., "building real things", "getting a job", "understanding how stuff works")`
+11. `Any specific goals or deadlines? (e.g., "pass OS exam by June", "build a portfolio project by summer")`
+12. `How much time can you dedicate? (e.g., "1 hour/day", "weekends only", "full-time")`
+13. `Last one — anything else I should know? Hobbies, interests, things you like or dislike? (I'll use these for analogies)`
 
 Wait for all answers. Then save to `~/.local/share/claude-education/student.json`:
 ```json
