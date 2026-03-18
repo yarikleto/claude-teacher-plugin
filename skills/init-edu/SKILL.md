@@ -45,7 +45,7 @@ Ask in this exact order, one at a time:
 
 1. `Hey! Before we start, I'd love to get to know you a bit. What's your name? (or what should I call you?)`
 2. `How old are you?`
-3. `What's your native language?`
+3. `What language would you like to communicate in? (I'll use it for everything — explanations, questions, feedback)`
 4. `What's your background? (student, self-taught, professional, switching fields...)`
 5. `What's your current level in the subject you want to study? (complete beginner / some experience / intermediate / advanced)`
 6. `What do you already know well? (subjects, skills, fields — anything relevant)`
@@ -56,7 +56,9 @@ Ask in this exact order, one at a time:
 11. `How much time can you dedicate? (e.g., "1 hour/day", "weekends only", "full-time")`
 12. `Last one — anything else I should know? Hobbies, interests, things you like or dislike? (I'll use these for analogies and examples)`
 
-Wait for all answers. Then save to `~/.local/share/claude-education/student.json`:
+Wait for all answers. **From this point on, communicate with the student in the language they specified in question 3. Use it for all explanations, questions, feedback, and quizzes — for the rest of this session and all future sessions.**
+
+Then save to `~/.local/share/claude-education/student.json`:
 ```json
 {
   "name": "{name}",

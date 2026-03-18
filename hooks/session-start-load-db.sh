@@ -12,6 +12,7 @@ if [ ! -f "$DB_DIR/student.json" ]; then
 fi
 
 NAME=$(jq -r '.name // "student"' "$DB_DIR/student.json" 2>/dev/null)
+LANG=$(jq -r '.preferred_language // .native_language // "English"' "$DB_DIR/student.json" 2>/dev/null)
 
 if [ ! -f "$DB_DIR/dashboard.json" ]; then
   echo "Student $NAME is onboarded but has no dashboard yet. Greet them by name and ask what they want to study."
@@ -61,7 +62,7 @@ fi
 
 # Build the context message for Claude
 MSG="=== SESSION START ===
-Student: $NAME | Today: $TODAY | Last session: $LAST
+Student: $NAME | Language: $LANG | Today: $TODAY | Last session: $LAST
 Stats: $SOLID solid, $LEARNED learned, $WEAK weak | Current topic: $TOPIC"
 
 if [ -n "$OVERDUE" ]; then
@@ -85,6 +86,7 @@ fi
 MSG="$MSG
 
 INSTRUCTIONS:
+0. Communicate in $LANG for this entire session — all explanations, questions, and feedback
 1. Greet $NAME by name
 2. If there are overdue/due topics — quiz them BEFORE any new material
 3. If there are weak topics — re-explain them with fresh analogies, target recorded misconceptions
