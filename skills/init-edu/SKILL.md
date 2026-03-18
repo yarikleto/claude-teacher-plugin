@@ -53,18 +53,17 @@ Ask in this exact order, one at a time:
 8. `What motivates you? (e.g., "understanding how things work", "applying it to real life", "passing an exam", "career change")`
 9. `Any specific goals or deadlines? (e.g., "understand personal finance by year end", "pass math exam in June", "build a project by summer")`
 10. `How much time can you dedicate? (e.g., "1 hour/day", "weekends only", "full-time")`
-11. `Last one — anything else I should know? Hobbies, interests, things you like or dislike? (I'll use these for analogies and examples)`
+11. `Almost done — anything else I should know? Hobbies, interests, things you like or dislike? (I'll use these for analogies and examples)`
+12. `Last one — describe your ideal teacher. How should I talk to you? What's their vibe? (e.g., "strict and no-nonsense like a professor", "friendly like an older friend", "patient and never rushes me", "uses a lot of humor", "gets straight to the point") — be as specific as you want, this shapes everything.`
 
 Wait for all answers. Then save to `~/.local/share/claude-education/student.json`:
 ```json
 {
   "name": "{name}",
   "age": "{age}",
-  "native_language": "{language}",
   "background": "{background}",
   "level": "{level}",
-  "known_technologies": ["{tech1}", "{tech2}"],
-  "failed_approaches": "{what_didnt_work}",
+  "known_subjects": ["{subject1}", "{subject2}"],
   "learning_style": ["{style1}", "{style2}"],
   "frustrations": ["{frustration1}", "{frustration2}"],
   "motivations": ["{motivation1}", "{motivation2}"],
@@ -75,18 +74,19 @@ Wait for all answers. Then save to `~/.local/share/claude-education/student.json
   "time_commitment": "{time}",
   "interests": ["{interest1}", "{interest2}"],
   "dislikes": ["{dislike1}", "{dislike2}"],
-  "preferences": {
-    "explanation_depth": "{depth}",
-    "pace": "{pace}",
-    "prefers_analogies": true,
-    "preferred_language_for_examples": "{lang}"
-  }
+  "teacher_persona": "{how the student described their ideal teacher — in their own words}"
 }
 ```
 
 **IMPORTANT:** After saving `student.json`, use this info to personalize the CLAUDE.md generated in Step 5. Add a `## Student Profile` section at the top of CLAUDE.md with a human-readable summary so the tutor always has quick access:
 
 ```markdown
+## Teacher Persona
+
+You are: **{teacher_persona}**
+
+This is how {name} wants to be taught. Let it shape your tone, pacing, humor level, directness, and communication style in every response — not just occasionally.
+
 ## Student Profile
 
 - **Name:** {name}
