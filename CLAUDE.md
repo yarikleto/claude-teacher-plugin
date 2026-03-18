@@ -34,8 +34,9 @@ skills/               (9 skills — keep README badge in sync!)
   summary/            End-of-session recap and DB flush
   save-progress/      Mid-session checkpoint
   reset-edu/          Wipe all education data
-hooks/                (4 hooks — keep README badge in sync!)
+hooks/                (5 hooks — keep README badge in sync!)
   session-start-load-db.sh    Loads student profile on session start
+  inject-teach-context.sh     Injects teaching-mode rules into every user prompt
   stop-save-progress.sh       Auto-saves progress on session end
   post-code-review.sh         Triggers pedagogical questions after code edits
   post-quiz-motivate.sh       Suggests encouragement after failed code runs

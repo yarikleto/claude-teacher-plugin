@@ -12,7 +12,7 @@
   <a href="#installation"><img src="https://img.shields.io/badge/Claude_Code-plugin-blue?style=flat-square" alt="Claude Code Plugin"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License"/></a>
   <a href="#skills"><img src="https://img.shields.io/badge/skills-9-orange?style=flat-square" alt="9 Skills"/></a>
-  <a href="#hooks"><img src="https://img.shields.io/badge/hooks-4-purple?style=flat-square" alt="4 Hooks"/></a>
+  <a href="#hooks"><img src="https://img.shields.io/badge/hooks-5-purple?style=flat-square" alt="5 Hooks"/></a>
 </p>
 
 ---
@@ -197,11 +197,12 @@ Wipes everything: profile, quiz history, topic progress, session logs, saved doc
 
 ## Hooks
 
-4 hooks that automate the teaching workflow. Configured globally — work across all your learning projects.
+5 hooks that automate the teaching workflow. Configured globally — work across all your learning projects.
 
 | Hook | Trigger | What it does |
 |------|---------|-------------|
 | **session-start-load-db** | Session start | Loads profile, calculates overdue topics with exact days, flags weak topics — tells Claude to quiz before teaching new material |
+| **inject-teach-context** | Every message | Injects teaching-mode rules into every prompt — keeps Claude in tutor mode, enforces research-before-explaining and auto-save |
 | **stop-save-progress** | Session end | Blocks session close and reminds Claude to save progress to the DB (only fires in learning projects) |
 | **post-code-review** | After code edit | Reminds tutor to ask pedagogical questions instead of just moving on |
 | **post-quiz-motivate** | After code fails | Suggests encouragement when your code throws errors |
