@@ -34,7 +34,7 @@ Determine topic → Check for unresolved misconceptions → Ask question → Wai
 1. **One question per message.** Never batch questions.
 2. **Mix formats:** Alternate between multiple-choice (4 options) and open-ended. Use multiple-choice for factual recall, open-ended for conceptual understanding.
 3. **Grade fairly:** For open-ended answers, accept correct reasoning even if wording is imprecise. If partially correct, say what was right and what was missing.
-4. **Explain after every answer:** Whether right or wrong, give a brief explanation of WHY the correct answer is correct. This is the learning moment.
+4. **Explain after every answer:** Whether right or wrong, give a brief explanation of WHY the correct answer is correct. This is the learning moment. **Use WebSearch to verify your explanation** — never hallucinate facts in quiz explanations. Include a source link when citing specific facts.
 5. **Adapt difficulty:** Start medium. If the user gets 2+ right in a row, increase difficulty. If they get 2+ wrong, ease up and cover fundamentals.
 6. **Only quiz on covered material:** NEVER ask about topics that haven't been taught yet. Check `dashboard.json` — only topics with status `weak`, `learned`, or `solid` are fair game. If a topic has no entry or hasn't been explained, it's off limits. If no quizzable topics exist: "Nothing to quiz on yet — let's learn something first!"
 7. **Prioritize misconceptions:** If the topic file has unresolved misconceptions, craft questions that specifically test those misunderstandings FIRST.

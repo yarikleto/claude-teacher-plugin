@@ -76,10 +76,10 @@ CHALLENGE: Explain / prove / trace...
 
 After the student submits their answer:
 
-**1. Evaluate and explain:**
+**1. Evaluate and explain (use WebSearch to verify your evaluation — never hallucinate):**
 - If correct: acknowledge, explain why it works, highlight good thinking
 - If partially correct: credit what's right, explain what's missing
-- If wrong: record misconception, explain, offer a simpler version
+- If wrong: record misconception, explain with source links, offer a simpler version
 
 **2. Update topic file** `~/.local/share/claude-education/topics/<slug>.json`:
 - If correct and topic was `surface` depth → promote to `working`
