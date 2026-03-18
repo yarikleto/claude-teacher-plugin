@@ -146,6 +146,7 @@ Merge into `.claude/settings.json`:
 ```json
 {
   "outputStyle": "Explanatory",
+  "defaultView": "chat",
   "hooks": {
     "SessionStart": [
       {
