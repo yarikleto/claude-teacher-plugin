@@ -45,35 +45,28 @@ Ask in this exact order, one at a time:
 
 1. `Hey! Before we start, I'd love to get to know you a bit. What's your name? (or what should I call you?)`
 2. `How old are you?`
-3. `What's your background? (student, self-taught, professional, switching fields...)`
-4. `What's your current level in the subject you want to study? (complete beginner / some experience / intermediate / advanced)`
-5. `What do you already know well? (subjects, skills, fields — anything relevant)`
-6. `How do you learn best? Pick all that apply: a) Visual diagrams  b) Examples first, then theory  c) Analogies to things I know  d) Theory first, then practice  e) Just throw me in  f) Mix of everything`
-7. `What frustrates you when learning? (e.g., "too much theory", "going too fast", "being talked down to", "not enough practice")`
-8. `What motivates you? (e.g., "understanding how things work", "applying it to real life", "passing an exam", "career change")`
-9. `Any specific goals or deadlines? (e.g., "understand personal finance by year end", "pass math exam in June", "build a project by summer")`
-10. `How much time can you dedicate? (e.g., "1 hour/day", "weekends only", "full-time")`
-11. `Almost done — anything else I should know? Hobbies, interests, things you like or dislike? (I'll use these for analogies and examples)`
-12. `Last one — describe your ideal teacher. How should I talk to you? What's their vibe? (e.g., "strict and no-nonsense like a professor", "friendly like an older friend", "patient and never rushes me", "uses a lot of humor", "gets straight to the point") — be as specific as you want, this shapes everything.`
+3. `What's your current level? (complete beginner / some experience / intermediate / advanced)`
+4. `What do you already know well? (any subjects, skills, or fields — I'll use them to build analogies)`
+5. `How do you learn best? Pick all that apply: a) Visual diagrams  b) Examples first, then theory  c) Analogies to things I know  d) Theory first, then practice  e) Just throw me in  f) Mix of everything`
+6. `What frustrates you when learning? (e.g., "too much theory", "going too fast", "being talked down to", "not enough examples")`
+7. `Any goals or deadlines? (e.g., "pass math exam in June", "understand investing by year end", "build a project") — or just say "no specific deadline"`
+8. `Hobbies, interests, things you like? (I'll use these for analogies — the more specific the better)`
+9. `Last one — describe your ideal teacher. What's their vibe? (e.g., "strict professor", "friendly older friend", "patient and never rushes", "direct and no-nonsense", "uses humor") — this shapes how I communicate.`
 
 Wait for all answers. Then save to `~/.local/share/claude-education/student.json`:
 ```json
 {
   "name": "{name}",
   "age": "{age}",
-  "background": "{background}",
   "level": "{level}",
   "known_subjects": ["{subject1}", "{subject2}"],
   "learning_style": ["{style1}", "{style2}"],
   "frustrations": ["{frustration1}", "{frustration2}"],
-  "motivations": ["{motivation1}", "{motivation2}"],
   "goals": [
     { "goal": "{goal1}", "deadline": "{deadline1}" },
     { "goal": "{goal2}", "deadline": null }
   ],
-  "time_commitment": "{time}",
   "interests": ["{interest1}", "{interest2}"],
-  "dislikes": ["{dislike1}", "{dislike2}"],
   "teacher_persona": "{how the student described their ideal teacher — in their own words}"
 }
 ```
@@ -91,15 +84,11 @@ This is how {name} wants to be taught. Let it shape your tone, pacing, humor lev
 
 - **Name:** {name}
 - **Age:** {age} → {tone_instruction}
-- **Background:** {background}
 - **Level:** {level}
-- **Knows:** {known_subjects}
+- **Knows:** {known_subjects} (build analogies from these)
 - **Learns best with:** {style1}, {style2}
-- **Frustrations:** {frustration1}, {frustration2}
-- **Motivations:** {motivation1}, {motivation2}
-- **Interests:** {interest1}, {interest2} (use for analogies!)
-- **Dislikes:** {dislike1}, {dislike2}
-- **Time:** {time}
+- **Frustrations:** {frustration1}, {frustration2} (never do these)
+- **Interests:** {interest1}, {interest2} (use for analogies)
 - **Goals:** {goal1} by {deadline1}, {goal2}
 
 Where `{tone_instruction}` is one of:

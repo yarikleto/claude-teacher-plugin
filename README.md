@@ -70,13 +70,12 @@ The tutor will:
 <details>
 <summary>Full onboarding in one command</summary>
 
-**Student profile (first time only) — 12 questions, one at a time:**
+**Student profile (first time only) — 9 questions, one at a time:**
 - Name and age (age calibrates tone and vocabulary automatically)
-- Background and current level
-- What you already know (to build on it)
-- How you learn best, frustrations, motivations
-- Goals with deadlines, time commitment
-- Interests and dislikes (used for analogies)
+- Current level and what you already know (to build on it)
+- How you learn best and what frustrates you
+- Goals with deadlines
+- Interests (used for analogies)
 - **Your ideal teacher** — describe the vibe: strict, funny, patient, direct, etc.
 
 **Project setup:**
