@@ -24,7 +24,7 @@ Use the same `--scope` that was used during install (`project`, `user`, or `loca
 ```
 .claude-plugin/
   plugin.json         Plugin metadata and version — bump this on every change
-skills/
+skills/               (9 skills — keep README badge in sync!)
   init-edu/           Onboarding + project setup
   quiz-me/            Adaptive quizzes with spaced repetition
   illustrate/         ASCII diagrams for visual explanations
@@ -33,7 +33,8 @@ skills/
   motivate/           Motivation boost with real quotes
   summary/            End-of-session recap and DB flush
   save-progress/      Mid-session checkpoint
-hooks/
+  reset-edu/          Wipe all education data
+hooks/                (4 hooks — keep README badge in sync!)
   session-start-load-db.sh    Loads student profile on session start
   stop-save-progress.sh       Auto-saves progress on session end
   post-code-review.sh         Triggers pedagogical questions after code edits
@@ -46,4 +47,7 @@ assets/
 
 1. Edit the relevant skill (`skills/<name>/SKILL.md`) or hook (`hooks/<name>.sh`)
 2. Bump the version in `.claude-plugin/plugin.json`
-3. Commit and push — the marketplace picks up the new version from the git tag or latest commit
+3. If you added or removed a skill or hook, update the badge counts in `README.md`:
+   - Find the line with `skills-N-orange` and `hooks-N-purple` and update the numbers
+   - Also update the comment in the Repository Structure section above
+4. Commit and push — the marketplace picks up the new version from the git tag or latest commit
