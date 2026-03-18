@@ -5,7 +5,7 @@ description: Use when the user wants to be quizzed, tested, or asked questions o
 
 # Quiz Me
 
-Interactive quiz that tests understanding through a mix of multiple-choice and open-ended questions.
+Interactive quiz that tests understanding through a mix of multiple-choice and open-ended questions. All results are saved to the global education DB.
 
 ## How to Use
 
@@ -15,22 +15,18 @@ Examples: `/quiz-me TCP sockets`, `/quiz-me git`, `/quiz-me sorting algorithms`
 
 ## Quiz Flow
 
-```dot
-digraph quiz {
-    "Determine topic and scope" [shape=box];
-    "Ask question" [shape=box];
-    "Wait for answer" [shape=box];
-    "Evaluate and explain" [shape=box];
-    "More questions?" [shape=diamond];
-    "Show score summary" [shape=box];
+### Setup
 
-    "Determine topic and scope" -> "Ask question";
-    "Ask question" -> "Wait for answer";
-    "Wait for answer" -> "Evaluate and explain";
-    "Evaluate and explain" -> "More questions?";
-    "More questions?" -> "Ask question" [label="yes"];
-    "More questions?" -> "Show score summary" [label="no or user stops"];
-}
+1. Read `~/.local/share/claude-education/dashboard.json` — check topic statuses
+2. Read `~/.local/share/claude-education/student.json` — adapt to learning style
+3. If a topic was given, read `~/.local/share/claude-education/topics/<topic>.json` if it exists — check for unresolved misconceptions and previous scores
+4. If no topic given, pick from: first any topics with `next_review <= today`, then `weak` topics, then `learned` topics
+5. Also check project-local `memory/knowledge_gaps.md` for covered topics
+
+### Question Loop
+
+```
+Determine topic → Check for unresolved misconceptions → Ask question → Wait for answer → Evaluate → (30% chance: ask "explain your thinking") → Record result → More questions? → Score summary → Save to DB
 ```
 
 ## Rules
@@ -40,12 +36,13 @@ digraph quiz {
 3. **Grade fairly:** For open-ended answers, accept correct reasoning even if wording is imprecise. If partially correct, say what was right and what was missing.
 4. **Explain after every answer:** Whether right or wrong, give a brief explanation of WHY the correct answer is correct. This is the learning moment.
 5. **Adapt difficulty:** Start medium. If the user gets 2+ right in a row, increase difficulty. If they get 2+ wrong, ease up and cover fundamentals.
-6. **Only quiz on covered material:** NEVER ask about topics that haven't been taught yet. Only draw questions from topics listed as Weak, Learned, or Solid in `memory/knowledge_gaps.md`. If a topic is in "Not Yet Covered" — it's off limits for quizzing.
-7. **Track score:** Keep a running tally (e.g., "3/5 correct"). Show final summary when the quiz ends.
-8. **Let the user control pace:** The quiz ends when the user says stop, or after 10 questions if no limit was specified. Ask "Continue?" after every 5 questions.
-9. **Use context:** If inside a project directory, read relevant files to generate questions about the actual codebase or assignment requirements — not just generic textbook questions.
-10. **No trick questions.** Every question should teach something useful.
-11. **Update knowledge tracking:** After the quiz, update `memory/knowledge_gaps.md` — move correct answers toward Solid, wrong answers toward Weak.
+6. **Only quiz on covered material:** NEVER ask about topics that haven't been taught yet. Check `dashboard.json` — only topics with status `weak`, `learned`, or `solid` are fair game. If a topic has no entry or hasn't been explained, it's off limits. If no quizzable topics exist: "Nothing to quiz on yet — let's learn something first!"
+7. **Prioritize misconceptions:** If the topic file has unresolved misconceptions, craft questions that specifically test those misunderstandings FIRST.
+8. **"Explain your thinking" check:** ~30% of correct answers, ask the student to explain WHY their answer is right. If their reasoning is wrong despite the correct answer, record it as a misconception.
+9. **Track score:** Keep a running tally (e.g., "3/5 correct"). Show final summary when the quiz ends.
+10. **Let the user control pace:** The quiz ends when the user says stop, or after 10 questions if no limit was specified. Ask "Continue?" after every 5 questions.
+11. **Use context:** If inside a project directory, read relevant files to generate questions about the actual codebase — not just generic textbook questions.
+12. **No trick questions.** Every question should teach something useful.
 
 ## Question Format
 
@@ -74,35 +71,80 @@ Correct! [or] Not quite.
 Score: 3/4
 ```
 
-## Score Summary
+If the student got it wrong, record the misconception immediately in the topic file.
 
-At the end of the quiz, show:
+## Score Summary & DB Update
+
+At the end of the quiz:
+
+**1. Show summary:**
 ```
 ── Quiz Complete ──────────────────
 Topic: [topic]
 Score: 7/10 (70%)
+Depth: [surface → working] (promoted!)
 
 Strong areas: [what they got right]
 Review these: [concepts they struggled with]
+Misconceptions found: [list any new ones]
+Next review: [calculated date]
 ───────────────────────────────────
 ```
 
-Then update knowledge tracking in memory.
+**2. Save quiz record** to `~/.local/share/claude-education/quizzes/[date]_[topic-slug].json`:
+```json
+{
+  "date": "[today]",
+  "topic": "[topic-slug]",
+  "questions": [
+    {
+      "question": "...",
+      "type": "multiple_choice|open_ended",
+      "student_answer": "...",
+      "correct_answer": "...",
+      "correct": true,
+      "reasoning_check": false,
+      "reasoning_was_sound": null
+    }
+  ],
+  "score": 70,
+  "status_before": "learned",
+  "status_after": "learned",
+  "depth_before": "surface",
+  "depth_after": "working",
+  "notes": "..."
+}
+```
+
+**3. Update topic file** `~/.local/share/claude-education/topics/[topic-slug].json`:
+- Update `quiz_scores` array, `last_reviewed`, `status`, `depth`
+- Add any new misconceptions
+- Recalculate `next_review` using spaced repetition:
+  - Score >=80%: double `review_interval_days`, set `next_review` accordingly
+  - Score <50%: reset interval to 1 day, demote to `weak`
+  - Score 50-79%: keep current interval
+
+**4. Update dashboard** `~/.local/share/claude-education/dashboard.json`:
+- Update topic entry, recalculate `stats`, `total_quizzes`, `average_score`
+
+**5. Update project-local** `memory/knowledge_gaps.md` if it exists.
+
+**6. Append to session log** `~/.local/share/claude-education/sessions/[date].jsonl`:
+```jsonl
+{"time": "[now]", "event": "quiz", "topic": "[slug]", "score": 70, "passed": true, "misconceptions_found": 1}
+```
+
+## Priority Order for Questions
+
+1. **Unresolved misconceptions** on the topic (highest priority — targeted questions)
+2. Topics marked **Weak** in dashboard (need remediation)
+3. Topics marked **Learned** with `next_review <= today` (due for spaced repetition)
+4. Topics marked **Learned** that haven't been verified at `working` depth
+5. Topics marked **Solid** — for reinforcement and deeper questions
 
 ## Integration with Other Skills
 
-This skill is part of the **claude-teacher** plugin. It shares state with sibling skills:
-
-- **`/illustrate [concept]`** — if a question involves a visual concept and the student got it wrong, offer to illustrate it for better understanding.
+- **`/illustrate [concept]`** — if a question involves a visual concept and the student got it wrong, offer to illustrate it.
 - **`/challenge [topic]`** — for hands-on practice after quiz identifies weak areas.
 - **`/progress`** — student can check their overall dashboard.
-- **`/init-edu`** — must be run once to set up knowledge tracking.
-
-**Shared state:** Read `memory/knowledge_gaps.md` at quiz start to prioritize weak/learned topics. Update it at quiz end with results.
-
-**Priority order for questions:**
-1. Topics marked **Weak** in knowledge tracking (highest priority)
-2. Topics marked **Learned** that haven't been verified
-3. Topics marked **Solid** — for reinforcement and deeper questions
-
-**CRITICAL: NEVER ask about topics from the "Not Yet Covered" section or any topic that hasn't been explicitly taught in a session with the student.** The quiz tests what was already explained, not what the student hasn't seen yet. If knowledge_gaps.md has no Weak/Learned/Solid topics, tell the student: "Nothing to quiz on yet — let's learn something first!"
+- **`/save-progress`** — quiz results are auto-saved, but student can explicitly save mid-session.

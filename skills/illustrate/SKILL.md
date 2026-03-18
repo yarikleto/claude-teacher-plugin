@@ -136,11 +136,24 @@ Create ASCII art diagrams with detailed educational explanations. All output is 
 - Keep consistent arrow lengths in sequence diagrams
 - If a diagram exceeds ~40 lines or ~10 nodes, split it up
 
+## DB Integration
+
+After creating the diagram and explanation:
+
+1. **Save to project-local** `docs/<concept-name>.md` (for project-specific concepts)
+2. **Save to global** `~/.local/share/claude-education/docs/<concept-name>.md` (for general concepts)
+3. **Append to session log** `~/.local/share/claude-education/sessions/[date].jsonl`:
+   ```jsonl
+   {"time": "[now]", "event": "illustrate", "topic": "[concept-slug]", "saved_to": "global|project|both"}
+   ```
+4. If the concept corresponds to a tracked topic, update `last_reviewed` in its topic file
+
 ## Integration with Other Skills
 
 This skill is part of the **claude-teacher** plugin:
 
 - **`/quiz-me`** — if a student gets a visual concept wrong during a quiz, suggest illustrating it.
 - **`/challenge`** — challenges may need diagrams as part of the answer.
+- **`/progress`** — diagrams count toward topic engagement.
 - Diagrams saved to `docs/` become the student's personal reference library.
 - The tutor (via CLAUDE.md) will suggest `/illustrate` when visual explanation helps.
