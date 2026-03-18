@@ -4,14 +4,14 @@
 
 <p align="center">
   <strong>The most attentive AI tutor for Claude Code</strong><br/>
-  Teaches by guiding, not giving answers. Tracks your knowledge across sessions.<br/>
+  Teaches any subject by guiding, not giving answers. Tracks your knowledge across sessions.<br/>
   Quizzes with spaced repetition. Catches wrong reasoning. Adapts to you.
 </p>
 
 <p align="center">
   <a href="#installation"><img src="https://img.shields.io/badge/Claude_Code-plugin-blue?style=flat-square" alt="Claude Code Plugin"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License"/></a>
-  <a href="#skills"><img src="https://img.shields.io/badge/skills-8-orange?style=flat-square" alt="8 Skills"/></a>
+  <a href="#skills"><img src="https://img.shields.io/badge/skills-9-orange?style=flat-square" alt="9 Skills"/></a>
   <a href="#hooks"><img src="https://img.shields.io/badge/hooks-4-purple?style=flat-square" alt="4 Hooks"/></a>
 </p>
 
@@ -19,9 +19,11 @@
 
 ## Why Claude Teacher?
 
-Most AI tools give you the answer and move on. **Claude Teacher makes you earn it** — through the Socratic method, targeted quizzes, and challenges designed around your specific misunderstandings. It's the difference between copying from Stack Overflow and actually understanding the code you write.
+Most AI tools give you the answer and move on. **Claude Teacher makes you earn it** — through the Socratic method, targeted quizzes, and challenges designed around your specific misunderstandings.
 
-**It remembers everything.** Your progress, misconceptions, and learning style persist across sessions and projects. Come back next week — the tutor picks up exactly where you left off.
+**Works for any subject** — CS, math, finance, psychology, history, exam prep, side projects. Not just programming.
+
+**It remembers everything.** Your progress, misconceptions, and learning style persist across sessions and projects. Come back next week — the tutor picks up exactly where you left off, quizzes you on what's overdue, and skips what you already know.
 
 ---
 
@@ -36,9 +38,9 @@ cd your-project
 claude plugins install claude-teacher --scope project
 ```
 
-**That's it.** Start a new Claude Code session — the plugin detects you're a new student and automatically runs onboarding. It will ask your name, how you learn best, and what you're studying. After that, just start learning.
+**That's it.** Start a new Claude Code session — the plugin detects you're a new student and runs onboarding automatically. After that, just start learning.
 
-> You can also run `/init-edu` manually at any time to set up a new project or re-do onboarding.
+> Run `/init-edu` manually at any time to set up a new project or re-do onboarding.
 
 ---
 
@@ -46,17 +48,18 @@ claude plugins install claude-teacher --scope project
 
 Teaching mode is **always on**. No commands needed. Just talk to Claude:
 
-> *"Teach me about TCP sockets"*
+> *"Explain compound interest"* or *"Teach me about TCP sockets"* or *"Help me understand recursion"*
 
 The tutor will:
 
-1. Research the topic via web search (never hallucinates — always provides sources)
+1. Research the topic via web search — never hallucinates, always provides sources
 2. Explain using analogies from **your** interests
-3. Give you code skeletons with `???` to fill in
-4. Quiz you after 2-3 concepts
-5. Ask "explain your thinking" to catch wrong reasoning
-6. Track everything in your personal knowledge DB
-7. Auto-save progress when you leave
+3. Adapt tone and vocabulary to **your age** (a 14-year-old and a 35-year-old get very different explanations)
+4. Teach in the style of **your ideal teacher** — strict professor, friendly mentor, no-nonsense coach — whatever you described during setup
+5. Quiz you after 2-3 concepts
+6. Ask "explain your thinking" to catch right-answer-wrong-reasoning
+7. Track everything in your personal knowledge DB
+8. Auto-save progress when you leave
 
 ---
 
@@ -67,33 +70,34 @@ The tutor will:
 <details>
 <summary>Full onboarding in one command</summary>
 
-**Student profile (first time only):**
-- Name, age, native language
-- Background, level, known technologies
-- Learning style, frustrations, motivations
+**Student profile (first time only) — 12 questions, one at a time:**
+- Name and age (age calibrates tone and vocabulary automatically)
+- Background and current level
+- What you already know (to build on it)
+- How you learn best, frustrations, motivations
 - Goals with deadlines, time commitment
-- Interests and dislikes (used for analogies and tone)
+- Interests and dislikes (used for analogies)
+- **Your ideal teacher** — describe the vibe: strict, funny, patient, direct, etc.
 
 **Project setup:**
-- `CLAUDE.md` — teaching rules adapted to your learning type, with your Student Profile at the top
-- `.claude/settings.json` — Explanatory output style + hooks
+- `CLAUDE.md` — teacher persona + student profile + teaching rules adapted to your learning type
+- `.claude/settings.json` — output style + hooks + `defaultView: chat` (hides tool noise)
 - `docs/` — directory for saved explanations
 - Global education DB at `~/.local/share/claude-education/`
-- Project-local knowledge tracking
 
 </details>
 
 ### `/quiz-me [topic]` — Adaptive Quizzes
 
 ```
-> /quiz-me TCP sockets
+> /quiz-me personal finance
 
-Q1 (medium): What is the correct order of server socket calls?
+Q1 (medium): What is the difference between a Roth IRA and a Traditional IRA?
 
-  a) socket() → listen() → bind() → accept()
-  b) socket() → bind() → listen() → accept()
-  c) bind() → socket() → listen() → accept()
-  d) socket() → connect() → listen() → accept()
+  a) Roth is pre-tax, Traditional is post-tax
+  b) Roth is post-tax, Traditional is pre-tax
+  c) Both are pre-tax but differ in withdrawal rules
+  d) They are the same with different contribution limits
 ```
 
 | Feature | How it works |
@@ -103,27 +107,23 @@ Q1 (medium): What is the correct order of server socket calls?
 | **Adaptive difficulty** | Increases after 2+ correct, decreases after 2+ wrong |
 | **"Explain your thinking"** | ~30% of correct answers get a "Why?" follow-up |
 | **Full recording** | Every question, answer, and score saved to the grade book |
-| **Auto-promotion** | Score >=80% → promotes toward Solid. <50% → demotes to Weak |
+| **Auto-promotion** | Score ≥80% → promotes toward Solid. <50% → demotes to Weak |
 
 ### `/illustrate [concept]` — ASCII Diagrams
 
 ```
-> /illustrate TCP three-way handshake
+> /illustrate compound interest over time
 
-  Client              Server
-    │                    │
-    │   SYN (seq=100)    │
-    │───────────────────▶│
-    │                    │
-    │  SYN-ACK (seq=300) │
-    │◀───────────────────│
-    │                    │
-    │   ACK (seq=101)    │
-    │───────────────────▶│
-    │                    │
+  $1000 @ 10%/year
+
+  Year 0  ████  $1,000
+  Year 5  ████████  $1,611
+  Year 10 ████████████  $2,594
+  Year 20 ████████████████████  $6,727
+               └── interest on interest, not just principal
 ```
 
-6 styles: sequence diagrams, flowcharts, RFC-style protocol headers, architecture layers, comparisons, tree hierarchies. Researches official docs before drawing. Auto-saves to your reference library.
+6 styles: sequence diagrams, flowcharts, comparisons, architecture layers, charts, tree hierarchies. Researches official sources before drawing. Auto-saves to your reference library.
 
 ### `/progress` — Knowledge Dashboard
 
@@ -138,9 +138,9 @@ Q1 (medium): What is the correct order of server socket calls?
   Learned (5)   ██████████░░░░░░░░░░  50%
   Weak (2)      ████░░░░░░░░░░░░░░░░  20%
 
-  DUE FOR REVIEW
-  · tcp-basics — due since Mar 18
-  · recursion — due since Mar 17
+  OVERDUE FOR REVIEW
+  · compound-interest — 3d overdue (working)
+  · tcp-basics — due today (surface)
 
   UNRESOLVED MISCONCEPTIONS
   · tcp-congestion: "confused slow start with congestion avoidance"
@@ -150,19 +150,19 @@ Q1 (medium): What is the correct order of server socket calls?
 ══════════════════════════════════════════════════
 ```
 
-Shows depth tracking (`surface` → `working` → `deep`), spaced repetition schedule, misconceptions, goal progress with deadline countdowns.
+Shows overdue topics with exact days, depth per topic, misconceptions, goal progress with deadline countdowns.
 
 ### `/challenge` — Mini-Tasks
 
-Hands-on exercises designed around your weak spots:
+Hands-on exercises designed around your weak spots and learning type:
 
 | Learning type | Example |
 |--------------|---------|
 | **Project** | *"Write a function that creates a TCP socket, binds to port 0, and prints the assigned port"* |
-| **Technology** | *"Your Kafka consumer group has 6 consumers but 4 partitions. What happens?"* |
-| **Theory** | *"Trace quicksort on [3, 6, 1, 8, 2]. Show each partition step."* |
+| **Subject / field** | *"You have $500/month to invest. Allocate it between index funds, bonds, and cash. Justify your split."* |
+| **Exam prep** | *"Trace quicksort on [3, 6, 1, 8, 2]. Show each partition step."* |
 
-Targets `surface` → `working` depth promotion. Designs challenges around your unresolved misconceptions.
+Targets `surface` → `working` depth promotion. Designs challenges around unresolved misconceptions.
 
 ### `/motivate` — Motivation Boost
 
@@ -184,31 +184,7 @@ Real quotes fetched live from APIs (ZenQuotes, Forismatic). 18 verified fallback
 
 ### `/summary` — Session Recap
 
-```
-══════════════════════════════════════════════════
-  SESSION SUMMARY — 2026-03-19
-══════════════════════════════════════════════════
-
-  LEARNED TODAY
-    ✓ socket() — creation, file descriptors
-    ✓ bind() — port assignment, byte order
-    ~ listen() — started, not finished
-
-  QUIZ RESULTS
-    · tcp-basics: 8/10 (80%) — promoted to solid!
-
-  SPACED REPETITION SCHEDULE
-    Tomorrow: listen()
-    In 4 days: tcp-basics
-
-  NEXT SESSION
-    1. Review: listen() backlog parameter
-    2. Continue: accept() and the echo server
-    3. Next new topic: multi-threading
-══════════════════════════════════════════════════
-```
-
-Full DB flush: updates topics, dashboard, session log. Shows depth transitions, resolved misconceptions, goal progress, and a prioritized plan for next time.
+Full DB flush at session end. Shows what was learned, quiz results, depth changes, resolved misconceptions, spaced repetition schedule, and a prioritized plan for next time.
 
 ### `/save-progress` — Mid-Session Checkpoint
 
@@ -216,33 +192,18 @@ Quick save without ending the session. Use anytime you want a safety checkpoint.
 
 ### `/reset-edu` — Delete All Data
 
-Wipes everything: profile, quiz history, topic progress, session logs, saved docs. Asks for confirmation before deleting.
-
-```
-> /reset-edu
-
-This will permanently delete:
-  · Your student profile (name, goals, learning style)
-  · All quiz history and scores
-  · All topic progress and misconceptions
-  · All session logs
-  · All saved explanations
-
-Are you sure? Type YES to confirm.
-```
-
-Run `/init-edu` afterward to start fresh.
+Wipes everything: profile, quiz history, topic progress, session logs, saved docs. Asks for `YES` confirmation before deleting. Run `/init-edu` afterward to start fresh.
 
 ---
 
 ## Hooks
 
-The plugin includes 4 hooks that automate the teaching workflow. Configured automatically by `/init-edu`.
+4 hooks that automate the teaching workflow. Configured globally — work across all your learning projects.
 
 | Hook | Trigger | What it does |
 |------|---------|-------------|
-| **session-start-load-db** | Session start | Loads your profile, flags topics due for review, greets you by name |
-| **stop-save-progress** | Session end | Auto-saves progress to the DB so you never lose work |
+| **session-start-load-db** | Session start | Loads profile, calculates overdue topics with exact days, flags weak topics — tells Claude to quiz before teaching new material |
+| **stop-save-progress** | Session end | Blocks session close and reminds Claude to save progress to the DB (only fires in learning projects) |
 | **post-code-review** | After code edit | Reminds tutor to ask pedagogical questions instead of just moving on |
 | **post-quiz-motivate** | After code fails | Suggests encouragement when your code throws errors |
 
@@ -268,7 +229,7 @@ Your progress persists across all projects in `~/.local/share/claude-education/`
 
 ```
 ~/.local/share/claude-education/
-├── student.json       Your profile — name, interests, learning style, goals
+├── student.json       Profile — name, age, persona, interests, goals, learning style
 ├── dashboard.json     All topic statuses and stats at a glance
 ├── topics/            One file per topic — status, depth, misconceptions, review schedule
 ├── quizzes/           Every quiz ever taken — the grade book
@@ -276,14 +237,29 @@ Your progress persists across all projects in `~/.local/share/claude-education/`
 └── docs/              Saved explanations — reusable across projects
 ```
 
-### Topic Progression
+### Spaced Repetition
+
+At every session start, the hook scans all topic files, calculates exact days overdue, and tells Claude what to review first:
 
 ```
-  Weak ──────────► Learned ──────────► Solid
-  (got it wrong)   (explained, understood)   (proven multiple times)
+OVERDUE (quiz these first):
+  - Compound interest (3d overdue, working, interval: 4d)
+  - TCP basics (1d overdue, surface, interval: 1d)
+
+WEAK (re-explain before new material):
+  - OSI model (weak, surface)
 ```
 
-Each topic also tracks **depth**:
+Review intervals double on success, reset to 1 day on failure:
+
+```
+Day 1 ──► Day 2 ──► Day 4 ──► Day 8 ──► Day 16 ──► ...
+         (pass)    (pass)    (pass)    (pass)
+
+Day 1 ──► Day 2 ──► FAIL ──► Day 1 (reset, demoted to Weak)
+```
+
+### Topic Depth
 
 | Depth | Meaning | How to advance |
 |-------|---------|----------------|
@@ -291,20 +267,20 @@ Each topic also tracks **depth**:
 | `working` | Used it correctly | Explain your reasoning, handle edge cases |
 | `deep` | Can teach it to others | Connect to other topics, no misconceptions |
 
-### Spaced Repetition
-
-```
-Day 1 ──► Day 2 ──► Day 4 ──► Day 8 ──► Day 16 ──► ...
-         (pass)    (pass)    (pass)    (pass)
-
-Day 1 ──► Day 2 ──► FAIL ──► Day 1 (reset)
-```
-
-Review intervals double on success, reset to 1 day on failure.
-
 ### Misconception Tracking
 
-When you get something wrong, the tutor records **what you said** and **why it's wrong** — not just "incorrect." Future quizzes and challenges specifically target your unresolved misconceptions until you demonstrate correct understanding.
+When you get something wrong, the tutor records **what you said** and **why it's wrong** — not just "incorrect." Future quizzes and challenges specifically target your unresolved misconceptions.
+
+### Age-Based Tone
+
+The tutor calibrates vocabulary and examples automatically:
+
+| Age | Style |
+|-----|-------|
+| ≤12 | Simple words, playful analogies, no jargon |
+| 13–17 | Casual and clear, school/hobby examples |
+| 18–25 | Adult tone, university/career examples |
+| 26+ | Peer tone, real-world professional examples |
 
 ---
 
@@ -312,39 +288,38 @@ When you get something wrong, the tutor records **what you said** and **why it's
 
 ```
 Day 1:
-  /init-edu                      Onboarding + project setup
-  "teach me about sockets"       Tutor researches, explains with your analogies
-  /illustrate TCP handshake      ASCII diagram + sources
-  /challenge                     "write a function that binds to port 0..."
+  /init-edu                      Onboarding — name, age, background, ideal teacher, topic
+  "explain compound interest"    Researches, explains with your analogies, saves to docs/
+  /illustrate growth over time   ASCII chart + sources
+  /challenge                     "Allocate $500/month. Justify your split."
   /summary                       Recap + spaced repetition schedule
 
 Day 2:
-  (hook greets you)              "Hey! tcp-basics is due for review"
-  /quiz-me tcp-basics            Targets your misconceptions first
+  (hook at session start)        "compound-interest is 1d overdue — quiz first"
+  /quiz-me compound interest     Targets your misconceptions first
   (continue learning)            New concepts with periodic quizzes
   /save-progress                 Mid-session checkpoint
-  /progress                      Dashboard with depth levels
+  /progress                      Dashboard: overdue topics, depth levels, goals
 
 Day 3:
-  (hook: 2 topics due)           Quick review quiz before new material
-  /quiz-me sockets               9/10! Promoted to Solid
-  /illustrate FTP modes          Active vs passive side-by-side
+  (hook: 2 topics overdue)       Quick review before new material
+  /quiz-me finance basics        9/10! Promoted to Solid
   (stuck on something)           Auto-triggers /motivate
-  /summary                       7 topics solid, next chapter ready
+  /summary                       Schedule set, next session plan ready
 ```
 
 ---
 
 ## Re-initialization
 
-Made a mistake during setup? Run `/init-edu` again:
+Run `/init-edu` again in any project:
 
 ```
 Welcome back! What would you like to do?
 
   a) Set up this project for learning (keep my profile)
-  b) Update my profile (change name, interests, goals, etc.)
-  c) Full reset — start fresh (wipes profile, keeps learning progress)
+  b) Update my profile (change name, interests, goals, persona, etc.)
+  c) Full reset — start fresh (wipes profile, keeps quiz history)
   d) Complete reset — wipe everything (profile + all progress)
 ```
 
@@ -367,6 +342,6 @@ claude plugins uninstall claude-teacher
 ---
 
 <p align="center">
-  <strong>Stop copying code. Start understanding it.</strong><br/>
+  <strong>Stop copying answers. Start actually learning.</strong><br/>
   <sub>MIT License</sub>
 </p>
