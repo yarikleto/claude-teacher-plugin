@@ -11,7 +11,7 @@
 <p align="center">
   <a href="#installation"><img src="https://img.shields.io/badge/Claude_Code-plugin-blue?style=flat-square" alt="Claude Code Plugin"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License"/></a>
-  <a href="#skills"><img src="https://img.shields.io/badge/skills-12-orange?style=flat-square" alt="12 Skills"/></a>
+  <a href="#skills"><img src="https://img.shields.io/badge/skills-15-orange?style=flat-square" alt="15 Skills"/></a>
   <a href="#hooks"><img src="https://img.shields.io/badge/hooks-5-purple?style=flat-square" alt="5 Hooks"/></a>
 </p>
 
@@ -118,6 +118,33 @@ Saved: docs/study-plan-ftp-server.md
 
 Decomposes any task or project into a structured study plan with phases (prerequisites → core skills → nice-to-have). For each topic: explains why it's needed, links to real resources (official docs, tutorials, articles, videos), includes self-check questions, and estimates study time. Cross-references your existing knowledge — skips what you already know. Saves as a markdown checklist you can follow at your own pace.
 
+### `/compare <A> vs <B>` — Side-by-Side Comparisons
+
+```
+> /compare REST vs GraphQL
+
+── Compare: REST vs GraphQL ──────────────────
+
+## What they are
+**REST:** An architectural style using standard HTTP methods on resource URLs.
+**GraphQL:** A query language that lets clients request exactly the data they need.
+
+## Side-by-side comparison
+| Feature        | REST               | GraphQL             |
+|----------------|--------------------|---------------------|
+| Data fetching  | Fixed endpoints    | Flexible queries    |
+| Over-fetching  | Common             | Avoided by design   |
+| Caching        | HTTP caching       | Needs custom layer  |
+| Learning curve | Lower              | Higher              |
+| ...            | ...                | ...                 |
+
+## When to use which
+Choose REST when: simple CRUD, public APIs, caching matters
+Choose GraphQL when: complex nested data, mobile clients, multiple consumers
+```
+
+Researches both concepts via WebSearch before comparing. Includes a comparison table, concrete "when to use which" scenarios, common misconceptions about the differences, and a key takeaway. Adapts to student level. Saves to docs.
+
 ### `/demo [concept]` — Animated Interactive Visualizations
 
 ```
@@ -221,6 +248,44 @@ Full DB flush at session end. Shows what was learned, quiz results, depth change
 ### `/save-progress` — Mid-Session Checkpoint
 
 Quick save without ending the session. Use anytime you want a safety checkpoint.
+
+### `/flashcards [topic]` — Anki-Style Flashcard Generation
+
+```
+> /flashcards tcp-basics
+
+── Flashcards Generated ──────────────────
+  Topic: TCP Basics
+  Cards: 8 (3 easy / 3 medium / 2 hard)
+  Misconception cards: 1
+  Card types: definition, what-happens-if, compare/contrast, fill-in-the-blank
+
+  Saved to:
+    docs/flashcards-tcp-basics.md
+    docs/flashcards-tcp-basics.csv
+──────────────────────────────────────────
+```
+
+Generates flashcards from your studied topics in two formats: Markdown (for reading) and Anki-compatible CSV (semicolon-separated, importable directly). Card types: definitions, concept application, "what happens if...", compare/contrast, fill-in-the-blank. Prioritizes weak topics, unresolved misconceptions, and topics due for review. Run `/flashcards` without a topic to generate cards for all studied topics.
+
+### `/roadmap <goal>` — Visual Learning Path
+
+```
+> /roadmap backend development
+
+── Roadmap Generated ────────────────────
+  Goal: Backend Development
+  Topics: 14 (3 solid / 2 learned / 1 weak / 8 new)
+  Milestones: 3
+  Current position: HTTP fundamentals
+
+  Saved to:
+    docs/roadmap-backend-development.excalidraw
+    docs/roadmap-backend-development.md
+──────────────────────────────────────────
+```
+
+Generates an interactive `.excalidraw` diagram showing your full learning path — topic nodes color-coded by status (green=solid, blue=learned, red=weak, gray=new), prerequisite arrows, milestone markers, and a "YOU ARE HERE" indicator. Also saves a markdown companion with the same info as a text checklist. Visual companion to `/research`. Re-run after learning new topics to see your progress visually.
 
 ### `/reset-edu` — Delete All Data
 
@@ -331,6 +396,7 @@ Day 1:
 Day 2:
   (hook at session start)        "compound-interest is 1d overdue — quiz first"
   /quiz-me compound interest     Targets your misconceptions first
+  /compare REST vs GraphQL       Side-by-side comparison with scenarios
   (continue learning)            New concepts with periodic quizzes
   /save-progress                 Mid-session checkpoint
   /progress                      Dashboard: overdue topics, depth levels, goals

@@ -63,6 +63,38 @@ CHALLENGE: Explain / prove / trace...
   [Problem statement]
 ```
 
+## Multiple-Choice Challenges — Use `AskUserQuestion`
+
+When a challenge naturally fits a multiple-choice format (scenario-based "what would you do?" or theory-based "which approach is correct?"), use the `AskUserQuestion` tool so the student can select with arrow keys. This is MANDATORY for any challenge that presents discrete options — never print options as plain text.
+
+```
+AskUserQuestion({
+  questions: [{
+    question: "CHALLENGE (medium): A client reports intermittent timeouts connecting to your service behind a load balancer. Which investigation step would you take FIRST?",
+    header: "Scenario Challenge",
+    multiSelect: false,
+    options: [
+      { label: "a) Restart the load balancer", description: "Quick fix attempt — but does it address the root cause?" },
+      { label: "b) Check load balancer health check logs", description: "See if backends are being marked unhealthy" },
+      { label: "c) Increase the client timeout value", description: "Masks the symptom — the timeouts still happen" },
+      { label: "d) Add more backend instances", description: "Helps with capacity, but is capacity the issue?" }
+    ]
+  }]
+})
+```
+
+**Rules for AskUserQuestion challenges:**
+- Provide exactly 4 options
+- Randomize the correct answer position
+- Write educational descriptions for each option — they serve as subtle hints and teach even as the student reads
+- The `header` field should indicate the challenge type (e.g., "Scenario Challenge", "Conceptual Challenge")
+- If the student selects "Other" (custom input), treat it as an open-ended answer and evaluate accordingly
+
+**When NOT to use AskUserQuestion:**
+- Code challenges (project type) — the student writes actual code, so use plain text
+- Open-ended conceptual challenges ("Explain in your own words...") — the student types freely
+- Challenges where the answer requires writing, drawing, or multi-step work
+
 ## Rules
 
 - ONE challenge per invocation. Keep it focused.

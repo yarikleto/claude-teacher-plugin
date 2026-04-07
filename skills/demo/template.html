@@ -11,11 +11,12 @@
 
   <style>
     /* ═══════════════════════════════════════════════
-       Theme variables + overrides Bootstrap can't do.
-       Everything else uses Bootstrap utilities.
+       Theme: dark (default) + light mode.
+       Toggle via data-bs-theme on <html>.
        ═══════════════════════════════════════════════ */
-    :root {
-      /* Canvas drawing colors (used by JS, not CSS) */
+
+    /* ── Dark theme (default) ──────────────────── */
+    [data-bs-theme="dark"] {
       --node-a: #4ea8de;
       --node-b: #4ecca3;
       --node-c: #f0c040;
@@ -26,19 +27,45 @@
       --warning: #f0c040;
       --error: #e94560;
       --info: #4ea8de;
-      --surface: #1a1f36;
+      --surface: #1c1f2e;
       --primary: #0f3460;
-      --text: #f0f0f5;
+      --text: #e8e8ed;
       --text-muted: #8b8fa3;
       --text-dim: #5a5e73;
+      --canvas-bg: #141722;
+      --panel-border: rgba(255, 255, 255, 0.06);
+    }
+    [data-bs-theme="dark"] body {
+      background: #111318;
     }
 
-    body {
-      background: linear-gradient(145deg, #0f0f1a 0%, #1a1a2e 50%, #151528 100%);
-      min-height: 100vh;
+    /* ── Light theme ───────────────────────────── */
+    [data-bs-theme="light"] {
+      --node-a: #2563eb;
+      --node-b: #16a34a;
+      --node-c: #d97706;
+      --data: #9333ea;
+      --accent: #dc2626;
+      --accent-glow: rgba(220, 38, 38, 0.2);
+      --success: #16a34a;
+      --warning: #d97706;
+      --error: #dc2626;
+      --info: #2563eb;
+      --surface: #ffffff;
+      --primary: #1e40af;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --canvas-bg: #f8fafc;
+      --panel-border: rgba(0, 0, 0, 0.1);
+    }
+    [data-bs-theme="light"] body {
+      background: #f1f5f9;
     }
 
-    /* Gradient title — Bootstrap can't do this */
+    /* ── Shared styles ─────────────────────────── */
+    body { min-height: 100vh; }
+
     .gradient-title {
       background: linear-gradient(135deg, var(--text) 0%, var(--info) 100%);
       -webkit-background-clip: text;
@@ -46,54 +73,63 @@
       background-clip: text;
     }
 
-    /* Canvas container */
     .canvas-wrap {
-      background: var(--surface);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      background: var(--canvas-bg);
+      border: 1px solid var(--panel-border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     }
     canvas { display: block; width: 100%; height: auto; }
 
-    /* Accent progress gradient — Bootstrap progress is solid color */
     .progress-accent .progress-bar {
       background: linear-gradient(90deg, var(--accent), var(--data));
     }
 
-    /* Explanation panel accent border */
     .explanation-panel {
       background: var(--surface);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--panel-border);
       border-left: 3px solid var(--accent);
     }
 
-    /* Speed group pill */
-    .speed-group {
-      background: rgba(0, 0, 0, 0.25);
-    }
+    .speed-group { background: rgba(128, 128, 128, 0.15); }
     .speed-group .btn-speed.active {
       background: var(--primary) !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      color: #fff !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* Active play button glow */
     .btn-glow.active {
       background-color: var(--accent) !important;
       border-color: var(--accent) !important;
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Responsive: hide button labels on mobile, keep icons */
+    .controls-panel {
+      background: var(--surface);
+      border: 1px solid var(--panel-border);
+    }
+
+    .step-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      background: var(--text-dim);
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .step-dot:hover { transform: scale(1.3); }
+    .step-dot.completed { background: var(--success); }
+    .step-dot.active { background: var(--accent); transform: scale(1.3); }
+
     @media (max-width: 576px) {
       .btn-label { display: none; }
     }
 
-    /* ═══════════════════════════════════════════════
-       CUSTOM STYLES — add concept-specific CSS here
-       ═══════════════════════════════════════════════ */
     /* __CUSTOM_CSS__ */
   </style>
 </head>
-<body class="d-flex justify-content-center p-3 text-light" data-bs-theme="dark">
+<body class="d-flex justify-content-center p-3">
 
   <div id="app" class="d-flex flex-column gap-2 w-100" style="max-width: 960px;"></div>
 
@@ -395,9 +431,63 @@
     function App() {
       const canvasRef = useRef(null);
       const wrapRef = useRef(null);
-      const [step, setStep] = useState(0);
+
+      // Restore step from localStorage, or start at 0
+      const initialStep = (() => {
+        const saved = localStorage.getItem('demo-step');
+        if (saved !== null) {
+          const n = parseInt(saved, 10);
+          if (!isNaN(n) && n >= 0 && n < STEPS.length) return n;
+        }
+        return 0;
+      })();
+
+      const [step, setStep] = useState(initialStep);
       const [playing, setPlaying] = useState(false);
       const [speed, setSpeed] = useState(1);
+
+      // Auto-detect dark/light preference
+      const [dark, setDark] = useState(() => {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+      });
+      const [isFullscreen, setIsFullscreen] = useState(false);
+
+      // Set initial theme on mount
+      useEffect(() => {
+        document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+      }, []);
+
+      // Persist step to localStorage
+      useEffect(() => {
+        localStorage.setItem('demo-step', step);
+      }, [step]);
+
+      // Theme toggle
+      const toggleTheme = useCallback(() => {
+        setDark(d => {
+          const next = !d;
+          document.documentElement.setAttribute('data-bs-theme', next ? 'dark' : 'light');
+          // Clear color cache so canvas picks up new CSS vars
+          Object.keys(_colorCache).forEach(k => delete _colorCache[k]);
+          return next;
+        });
+      }, []);
+
+      // Fullscreen toggle
+      const toggleFullscreen = useCallback(() => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      }, []);
+
+      // Sync isFullscreen state with Fullscreen API events
+      useEffect(() => {
+        const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+        document.addEventListener('fullscreenchange', onChange);
+        return () => document.removeEventListener('fullscreenchange', onChange);
+      }, []);
       const animRef = useRef({ progress: 0, pauseTimer: 0, lastTs: null });
       const dimsRef = useRef({ W: 0, H: 0 });
 
@@ -426,6 +516,9 @@
         const ctx = cvs.getContext('2d');
         const { W, H } = dimsRef.current;
         ctx.clearRect(0, 0, W, H);
+        // Fill canvas with theme background
+        ctx.fillStyle = color('--canvas-bg');
+        ctx.fillRect(0, 0, W, H);
 
         if (typeof window.drawBackground === 'function') window.drawBackground(ctx, W, H);
 
@@ -521,6 +614,19 @@
         setStep(0);
       }, []);
 
+      // Jump to arbitrary step (for step scrubber)
+      const goToStep = useCallback((target) => {
+        if (target < 0 || target >= STEPS.length) return;
+        setPlaying(false);
+        // If jumping forward, show completed state; if back, start animation from 0
+        animRef.current = {
+          progress: target > step ? 0 : (target < step ? 1 : animRef.current.progress),
+          pauseTimer: 0,
+          lastTs: null
+        };
+        setStep(target);
+      }, [step]);
+
       // Keyboard
       useEffect(() => {
         const onKey = (e) => {
@@ -528,13 +634,15 @@
           if (e.key === 'ArrowLeft') { goPrev(); e.preventDefault(); }
           if (e.key === ' ') { togglePlay(); e.preventDefault(); }
           if (e.key.toLowerCase() === 'r') { resetAll(); e.preventDefault(); }
+          if (e.key.toLowerCase() === 'f') { toggleFullscreen(); e.preventDefault(); }
         };
         document.addEventListener('keydown', onKey);
         return () => document.removeEventListener('keydown', onKey);
-      }, [goNext, goPrev, togglePlay, resetAll]);
+      }, [goNext, goPrev, togglePlay, resetAll, toggleFullscreen]);
 
       const current = STEPS[step] || {};
       const pct = ((step + animRef.current.progress) / STEPS.length) * 100;
+      const btnClass = dark ? 'btn-outline-light' : 'btn-outline-dark';
       const speeds = [
         { val: 2, label: 'Slow', icon: 'bi-chevron-right' },
         { val: 1, label: 'Normal', icon: 'bi-forward' },
@@ -542,9 +650,21 @@
       ];
 
       return html`
-        <div class="text-center py-2">
+        <div class="text-center py-2 position-relative">
           <h1 class="gradient-title fw-bold fs-3 mb-1">__TITLE__</h1>
           <p class="text-secondary small mb-0">__SUBTITLE__</p>
+          <div class="position-absolute top-0 end-0 mt-1 me-1 d-flex gap-1">
+            <button class="btn btn-sm border-0"
+                    onClick=${toggleFullscreen} title=${isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                    style="font-size: 1.2rem; opacity: 0.6;">
+              <i class="bi ${isFullscreen ? 'bi-fullscreen-exit' : 'bi-fullscreen'}"></i>
+            </button>
+            <button class="btn btn-sm border-0"
+                    onClick=${toggleTheme} title=${dark ? 'Switch to light mode' : 'Switch to dark mode'}
+                    style="font-size: 1.2rem; opacity: 0.6;">
+              <i class="bi ${dark ? 'bi-sun' : 'bi-moon-fill'}"></i>
+            </button>
+          </div>
         </div>
 
         <div class="canvas-wrap rounded-4 overflow-hidden" ref=${wrapRef}>
@@ -555,22 +675,30 @@
           <div class="progress-bar" style=${{ width: pct + '%', transition: 'width 0.25s ease' }}></div>
         </div>
 
+        <div class="d-flex justify-content-center align-items-center gap-2 py-1 flex-wrap">
+          ${STEPS.map((_, i) => html`
+            <button class="step-dot ${i < step ? 'completed' : ''} ${i === step ? 'active' : ''}"
+                    onClick=${() => goToStep(i)}
+                    title=${'Step ' + (i + 1) + ': ' + (STEPS[i].title || '')}></button>
+          `)}
+        </div>
+
         <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 p-3 rounded-4"
              style="background: var(--surface); border: 1px solid rgba(255,255,255,0.06);">
-          <button class="btn btn-outline-light btn-sm d-inline-flex align-items-center gap-1"
+          <button class="btn ${btnClass} btn-sm d-inline-flex align-items-center gap-1"
                   onClick=${goPrev} disabled=${step === 0} title="Previous (←)">
             <i class="bi bi-skip-backward-fill"></i><span class="btn-label">Prev</span>
           </button>
-          <button class="btn btn-outline-light btn-sm btn-glow d-inline-flex align-items-center gap-1 ${playing ? 'active' : ''}"
+          <button class="btn ${btnClass} btn-sm btn-glow d-inline-flex align-items-center gap-1 ${playing ? 'active' : ''}"
                   onClick=${togglePlay} title="Play / Pause (Space)">
             <i class="bi ${playing ? 'bi-pause-fill' : 'bi-play-fill'}"></i>
             <span class="btn-label">${playing ? 'Pause' : 'Play'}</span>
           </button>
-          <button class="btn btn-outline-light btn-sm d-inline-flex align-items-center gap-1"
+          <button class="btn ${btnClass} btn-sm d-inline-flex align-items-center gap-1"
                   onClick=${goNext} disabled=${step === STEPS.length - 1} title="Next (→)">
             <i class="bi bi-skip-forward-fill"></i><span class="btn-label">Next</span>
           </button>
-          <button class="btn btn-outline-light btn-sm" onClick=${resetAll} title="Reset (R)">
+          <button class="btn ${btnClass} btn-sm" onClick=${resetAll} title="Reset (R)">
             <i class="bi bi-arrow-counterclockwise"></i>
           </button>
 
@@ -602,7 +730,8 @@
         <div class="text-center small" style="font-size: 0.72rem; color: var(--text-dim);">
           <kbd>←</kbd> <kbd>→</kbd> navigate${' '}
           <kbd>Space</kbd> play/pause${' '}
-          <kbd>R</kbd> reset
+          <kbd>R</kbd> reset${' '}
+          <kbd>F</kbd> fullscreen
         </div>
 
         <footer class="text-center text-secondary" style="font-size: 0.75rem;">
