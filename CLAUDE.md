@@ -24,7 +24,7 @@ Use the same `--scope` that was used during install (`project`, `user`, or `loca
 ```
 .claude-plugin/
   plugin.json         Plugin metadata and version — bump this on every change
-skills/               (11 skills — keep README badge in sync!)
+skills/               (12 skills — keep README badge in sync!)
   init-edu/           Onboarding + project setup
   quiz-me/            Adaptive quizzes with spaced repetition
   excalidraw/         Excalidraw interactive diagrams
@@ -36,6 +36,7 @@ skills/               (11 skills — keep README badge in sync!)
   motivate/           Motivation boost with real quotes
   summary/            End-of-session recap and DB flush
   save-progress/      Mid-session checkpoint
+  research/           Study plan generator with resources
   reset-edu/          Wipe all education data
 hooks/                (5 hooks — keep README badge in sync!)
   session-start-load-db.sh    Loads student profile on session start

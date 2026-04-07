@@ -11,7 +11,7 @@
 <p align="center">
   <a href="#installation"><img src="https://img.shields.io/badge/Claude_Code-plugin-blue?style=flat-square" alt="Claude Code Plugin"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License"/></a>
-  <a href="#skills"><img src="https://img.shields.io/badge/skills-11-orange?style=flat-square" alt="11 Skills"/></a>
+  <a href="#skills"><img src="https://img.shields.io/badge/skills-12-orange?style=flat-square" alt="12 Skills"/></a>
   <a href="#hooks"><img src="https://img.shields.io/badge/hooks-5-purple?style=flat-square" alt="5 Hooks"/></a>
 </p>
 
@@ -107,6 +107,16 @@ Q1 (medium): What is the difference between a Roth IRA and a Traditional IRA?
 | **"Explain your thinking"** | ~30% of correct answers get a "Why?" follow-up |
 | **Full recording** | Every question, answer, and score saved to the grade book |
 | **Auto-promotion** | Score ≥80% → promotes toward Solid. <50% → demotes to Weak |
+
+### `/research <task>` — Study Plan Generator
+
+```
+> /research build an FTP server in C
+
+Saved: docs/study-plan-ftp-server.md
+```
+
+Decomposes any task or project into a structured study plan with phases (prerequisites → core skills → nice-to-have). For each topic: explains why it's needed, links to real resources (official docs, tutorials, articles, videos), includes self-check questions, and estimates study time. Cross-references your existing knowledge — skips what you already know. Saves as a markdown checklist you can follow at your own pace.
 
 ### `/demo [concept]` — Animated Interactive Visualizations
 
