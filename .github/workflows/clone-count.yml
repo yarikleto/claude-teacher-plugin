@@ -18,5 +18,12 @@ jobs:
           clones_color: blue
           views_color: brightgreen
 
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: traffic
+          publish_dir: .traffic
+          keep_files: true
+
 permissions:
   contents: write
