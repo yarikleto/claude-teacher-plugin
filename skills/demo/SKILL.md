@@ -52,15 +52,32 @@ const STEPS = [
   {
     title: "Short step name",       // shown in step title bar
     explain: "What's happening.",    // shown in explanation panel
+
+    // REQUIRED: animation during this step (progress: 0→1)
     draw(ctx, progress, W, H, stepIndex) {
-      // progress: 0→1 within this step
-      // W, H: canvas dimensions
-      // Use drawing library functions below
+      // Draw both persistent elements (arrow) AND transient ones (moving packet)
+      drawArrow(ctx, x1, y1, x2, y2, opts);
+      drawMovingPacket(ctx, x1, y1, x2, y2, progress, 'SYN');
+    },
+
+    // OPTIONAL: what stays on screen AFTER this step completes
+    // If omitted, draw(ctx, 1, ...) is used as fallback.
+    // Use this to prevent transient elements (packets, popups, detail boxes)
+    // from piling up on screen across steps.
+    drawResult(ctx, W, H, stepIndex) {
+      // Only the persistent elements — the arrow stays, the packet is gone
+      drawArrow(ctx, x1, y1, x2, y2, opts);
     }
   },
   // ... 5-15 steps
 ];
 ```
+
+**IMPORTANT — `draw` vs `drawResult`:**
+- `draw()` renders the full animation including transient elements (moving packets, popups, detail panels)
+- `drawResult()` renders ONLY what should stay visible after the step is done
+- Without `drawResult`, ALL elements from `draw()` persist — this causes overlap bugs in protocol flows where moving packets and header boxes pile up
+- **Always define `drawResult`** for steps that have transient animated elements
 
 ### Optional: drawBackground(ctx, W, H)
 
@@ -202,16 +219,37 @@ window.drawBackground = function(ctx, W, H) {
   drawDashedLine(ctx, W*0.25, H*0.14, W*0.25, H*0.95);
   drawDashedLine(ctx, W*0.75, H*0.14, W*0.75, H*0.95);
 };
-// Steps: drawArrow + drawMovingPacket + drawPill for state labels
+
+// Example step with draw + drawResult:
+const step1 = {
+  title: "Client sends SYN",
+  explain: "Client initiates with SYN packet.",
+  draw(ctx, progress, W, H) {
+    // Arrow line (persistent)
+    drawArrow(ctx, W*0.25, H*0.25, W*0.75, H*0.25, { strokeColor: color('--accent') });
+    // Moving packet (transient — disappears after step)
+    drawMovingPacket(ctx, W*0.25, H*0.25, W*0.75, H*0.25, progress, 'SYN');
+    // State label fades in
+    const lp = subProgress(progress, 0.8, 1);
+    if (lp > 0) drawPill(ctx, 'SYN_SENT', W*0.25, H*0.32, { fill: color('--warning') });
+  },
+  drawResult(ctx, W, H) {
+    // Only the arrow + state label stay — no packet
+    drawArrow(ctx, W*0.25, H*0.25, W*0.75, H*0.25, { strokeColor: color('--accent') });
+    drawPill(ctx, 'SYN_SENT', W*0.25, H*0.32, { fill: color('--warning') });
+  }
+};
 ```
 
 ### Algorithm Trace
 - `drawBackground`: array cells as boxes in a row
 - Steps: highlight comparing cells, animate swaps, mark sorted
+- `drawResult`: show cells in their new positions after swap, sorted cells in green
 
 ### State Machine
 - `drawBackground`: all state circles + transition arrows (dimmed)
 - Steps: `withGlow` to highlight current state, animate pulse along transition
+- `drawResult`: highlight the new current state (no pulse animation)
 
 ## Quality Checklist
 

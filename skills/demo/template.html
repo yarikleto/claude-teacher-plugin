@@ -522,8 +522,11 @@
        CONTENT — FILL THIS SECTION
 
        You MUST define:
-       1. STEPS array — each step is:
-          { title, explain, draw(ctx, progress, W, H, stepIndex) }
+       1. STEPS array — each step has:
+          - draw(ctx, progress, W, H, stepIndex) — REQUIRED, animation during this step
+          - drawResult(ctx, W, H, stepIndex) — OPTIONAL, what persists after step completes
+            (e.g., an arrow stays but the moving packet is gone)
+            If omitted, draw(ctx, 1, ...) is used as fallback.
 
        2. (optional) drawBackground(ctx, W, H)
           — static elements drawn every frame behind everything
@@ -550,16 +553,21 @@
       {
         title: "Example step",
         explain: "Replace this with your steps. Open the template docs in SKILL.md for the full API reference.",
+        // draw() — runs during animation (progress: 0→1)
         draw(ctx, progress, W, H) {
-          drawBox(ctx, W * 0.25, H * 0.25, W * 0.5, H * 0.5, {
-            fill: color('--primary'), stroke: color('--accent'),
-          });
-          drawText(ctx, 'Replace me', W * 0.5, H * 0.5, { size: 20, weight: '600' });
-          // Example animation: pill fades in
-          const fadeIn = easeOut(progress);
-          drawPill(ctx, 'animated', W * 0.5, H * 0.8, {
-            fill: color('--data'), textColor: '#fff',
-          });
+          // Static part (arrow line)
+          drawArrow(ctx, W * 0.25, H * 0.5, W * 0.75, H * 0.5, { strokeColor: color('--accent') });
+          // Animated part (moving packet — only visible during this step)
+          drawMovingPacket(ctx, W * 0.25, H * 0.5, W * 0.75, H * 0.5, progress, 'SYN');
+          // Label fades in at end
+          const labelP = subProgress(progress, 0.7, 1);
+          if (labelP > 0) drawPill(ctx, 'SENT', W * 0.5, H * 0.35, { fill: color('--success') });
+        },
+        // drawResult() — what stays on screen after this step completes
+        // (no moving packet, just the arrow + label)
+        drawResult(ctx, W, H) {
+          drawArrow(ctx, W * 0.25, H * 0.5, W * 0.75, H * 0.5, { strokeColor: color('--accent') });
+          drawPill(ctx, 'SENT', W * 0.5, H * 0.35, { fill: color('--success') });
         }
       }
     ];
@@ -614,9 +622,16 @@
         if (typeof window.drawBackground === 'function') window.drawBackground(ctx, W, H);
 
         const currentStep = step;
+        // Draw completed steps — use drawResult (persistent aftermath) if defined,
+        // otherwise fall back to draw(ctx, 1, ...) for backward compatibility
         for (let i = 0; i < currentStep; i++) {
-          if (STEPS[i]?.draw) STEPS[i].draw(ctx, 1, W, H, i);
+          if (STEPS[i]?.drawResult) {
+            STEPS[i].drawResult(ctx, W, H, i);
+          } else if (STEPS[i]?.draw) {
+            STEPS[i].draw(ctx, 1, W, H, i);
+          }
         }
+        // Draw current step (animating)
         if (STEPS[currentStep]?.draw) {
           STEPS[currentStep].draw(ctx, animRef.current.progress, W, H, currentStep);
         }
