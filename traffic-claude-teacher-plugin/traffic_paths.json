@@ -1,0 +1,50 @@
+[
+  {
+    "path": "/yarikleto/claude-teacher-plugin",
+    "title": "Overview",
+    "count": 12,
+    "uniques": 11
+  },
+  {
+    "path": "/yarikleto/claude-teacher-plugin/tree/main/skills",
+    "title": "/tree/main/skills",
+    "count": 2,
+    "uniques": 2
+  },
+  {
+    "path": "/yarikleto/claude-teacher-plugin/blob/main/.claude-plugin/marketplace.json",
+    "title": "/blob/main/.claude-plugin/marketplace.json",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "path": "/yarikleto/claude-teacher-plugin/blob/main/skills/challenge/SKILL.md",
+    "title": "/blob/main/skills/challenge/SKILL.md",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "path": "/yarikleto/claude-teacher-plugin/blob/main/skills/illustrate/SKILL.md",
+    "title": "/blob/main/skills/illustrate/SKILL.md",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "path": "/yarikleto/claude-teacher-plugin/blob/main/skills/init-edu/SKILL.md",
+    "title": "/blob/main/skills/init-edu/SKILL.md",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "path": "/yarikleto/claude-teacher-plugin/blob/main/skills/save-progress/SKILL.md",
+    "title": "/blob/main/skills/save-progress/SKILL.md",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "path": "/yarikleto/claude-teacher-plugin/tree/main/skills/save-progress",
+    "title": "/tree/main/skills/save-progress",
+    "count": 1,
+    "uniques": 1
+  }
+]
