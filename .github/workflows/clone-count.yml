@@ -1,14 +1,22 @@
-name: GitHub Clone Count
+name: Traffic to Badge
 
 on:
   schedule:
-    - cron: "0 */24 * * *"
+    - cron: "1 0 * * *"
   workflow_dispatch:
 
 jobs:
-  count:
+  traffic:
     runs-on: ubuntu-latest
     steps:
-      - uses: MShawon/github-clone-count-badge@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.SECRET_TOKEN }}
+      - uses: actions/checkout@v4
+
+      - uses: yi-Xu-0100/traffic-to-badge@main
+        with:
+          my_token: ${{ secrets.TRAFFIC_TOKEN }}
+          traffic_branch: traffic
+          clones_color: blue
+          views_color: brightgreen
+
+permissions:
+  contents: write
