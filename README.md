@@ -13,7 +13,6 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License"/></a>
   <a href="#skills"><img src="https://img.shields.io/badge/skills-15-orange?style=flat-square" alt="15 Skills"/></a>
   <a href="#hooks"><img src="https://img.shields.io/badge/hooks-5-purple?style=flat-square" alt="5 Hooks"/></a>
-  <img src="https://raw.githubusercontent.com/yarikleto/claude-teacher-plugin/traffic/total_clones.svg" alt="Clones"/>
 </p>
 
 ---
