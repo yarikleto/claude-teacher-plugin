@@ -13,6 +13,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License"/></a>
   <a href="#skills"><img src="https://img.shields.io/badge/skills-15-orange?style=flat-square" alt="15 Skills"/></a>
   <a href="#hooks"><img src="https://img.shields.io/badge/hooks-5-purple?style=flat-square" alt="5 Hooks"/></a>
+  <img src="https://img.shields.io/badge/dynamic/json?color=success&label=clones&query=count&url=https://gist.githubusercontent.com/yarikleto/GIST_ID_PLACEHOLDER/raw/clone.json&logo=github&style=flat-square" alt="Clones"/>
 </p>
 
 ---
