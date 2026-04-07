@@ -32,7 +32,24 @@ Ask clarifying questions if the task is vague:
 - Any deadline?
 - Any constraints? (language, framework, platform)
 
-### 2. Decompose the Task
+### 2. Scan the Project (if applicable)
+
+If the student is working inside a project directory, **read the codebase** before planning:
+
+- **Glob** for source files to understand the tech stack (languages, frameworks, libraries)
+- **Read** key files: `README.md`, `package.json`/`Cargo.toml`/`Makefile`/etc., config files, main entry points
+- **Grep** for patterns that reveal what's already implemented vs what's missing
+- **Check git log** — recent commits show what the student has been working on
+
+This tells you:
+- What the student has **already built** (don't plan topics for finished work)
+- What they're **currently stuck on** (prioritize those topics)
+- What **specific technologies** they're using (find resources for those exact versions/frameworks)
+- What **gaps exist** between current code and the goal
+
+If there's no project yet (pure learning goal), skip this step.
+
+### 3. Decompose the Task
 
 Break the task into skills/knowledge areas needed. For each area, determine:
 - Is it a **prerequisite** (must know before starting)?
@@ -40,6 +57,8 @@ Break the task into skills/knowledge areas needed. For each area, determine:
 - Is it **nice-to-have** (improves quality but not required)?
 
 Cross-reference with `dashboard.json` — if the student already has a topic at `solid` or `working` depth, mark it as done in the plan.
+
+Cross-reference with the **project scan** — if the codebase already has a working implementation of something (e.g., TCP socket setup is done), mark that topic as done and note "already implemented in your project."
 
 ### 3. Research Resources
 
@@ -54,7 +73,13 @@ Use **WebSearch** to find real, authoritative resources for each topic. For ever
 | Interactive | Exercism, LeetCode, Katacoda | For practice-oriented students |
 
 **Rules:**
-- Every link MUST be real and verified via WebSearch — never hallucinate URLs
+- Every link MUST be real and verified — never hallucinate URLs
+- **WebFetch** the top resource for each topic to verify:
+  - The page loads and isn't a 404
+  - The content is actually relevant to what you're recommending
+  - It's reasonably current (not a 2015 tutorial for a 2026 framework)
+  - Note the actual title and a one-line summary of what it covers
+- If a resource is dead or irrelevant after fetching, replace it — don't include it
 - Prefer free resources over paid
 - Prefer official docs over third-party when quality is equal
 - Include estimated reading/watching time when possible
