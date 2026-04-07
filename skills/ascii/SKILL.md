@@ -1,15 +1,15 @@
 ---
-name: illustrate
-description: Use when user invokes /illustrate to create an ASCII art diagram explaining a concept — protocol flows, data structures, state machines, architecture, or any technical idea that benefits from a visual representation with educational explanation
+name: ascii
+description: "DEFAULT diagram skill — simplest tier. Use when user invokes /ascii OR when suggesting a quick visual. Creates ASCII art rendered inline in terminal — zero friction. Escalate to /excalidraw for complex static diagrams (5+ components, multi-layer). Escalate to /demo for animated/dynamic concepts (protocol handshakes, algorithm traces, state transitions)."
 ---
 
-# Illustrate
+# ASCII
 
 Create ASCII art diagrams with detailed educational explanations. All output is pure Unicode box-drawing art — renders in any modern terminal, no external tools needed.
 
 ## Invocation
 
-`/illustrate <concept description>`
+`/ascii <concept description>`
 
 ## Style Selection
 
@@ -144,7 +144,7 @@ After creating the diagram and explanation:
 2. **Save to global** `~/.local/share/claude-education/docs/<concept-name>.md` (for general concepts)
 3. **Append to session log** `~/.local/share/claude-education/sessions/[date].jsonl`:
    ```jsonl
-   {"time": "[now]", "event": "illustrate", "topic": "[concept-slug]", "saved_to": "global|project|both"}
+   {"time": "[now]", "event": "ascii", "topic": "[concept-slug]", "saved_to": "global|project|both"}
    ```
 4. If the concept corresponds to a tracked topic, update `last_reviewed` in its topic file
 
@@ -156,4 +156,4 @@ This skill is part of the **claude-teacher** plugin:
 - **`/challenge`** — challenges may need diagrams as part of the answer.
 - **`/progress`** — diagrams count toward topic engagement.
 - Diagrams saved to `docs/` become the student's personal reference library.
-- The tutor (via CLAUDE.md) will suggest `/illustrate` when visual explanation helps.
+- The tutor (via CLAUDE.md) will suggest `/ascii` when visual explanation helps.

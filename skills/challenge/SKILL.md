@@ -100,5 +100,5 @@ After the student submits their answer:
 ## Integration with Other Skills
 
 - **`/quiz-me`** — challenges are more hands-on than quizzes. Use challenges to promote depth, quizzes to test breadth.
-- **`/illustrate`** — if the challenge involves a visual concept, offer to illustrate after evaluation.
+- **`/ascii`** — if the challenge involves a visual concept, offer to illustrate after evaluation.
 - **`/progress`** — student can check how challenges affected their dashboard.

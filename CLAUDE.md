@@ -24,10 +24,13 @@ Use the same `--scope` that was used during install (`project`, `user`, or `loca
 ```
 .claude-plugin/
   plugin.json         Plugin metadata and version — bump this on every change
-skills/               (9 skills — keep README badge in sync!)
+skills/               (11 skills — keep README badge in sync!)
   init-edu/           Onboarding + project setup
   quiz-me/            Adaptive quizzes with spaced repetition
-  illustrate/         ASCII diagrams for visual explanations
+  excalidraw/         Excalidraw interactive diagrams
+    references/       Color palette, element templates, JSON schema
+  ascii/              ASCII diagrams for visual explanations
+  demo/               Animated interactive HTML visualizations
   progress/           Knowledge dashboard
   challenge/          Mini-tasks for hands-on practice
   motivate/           Motivation boost with real quotes

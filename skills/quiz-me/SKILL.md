@@ -144,7 +144,7 @@ Next review: [calculated date]
 
 ## Integration with Other Skills
 
-- **`/illustrate [concept]`** — if a question involves a visual concept and the student got it wrong, offer to illustrate it.
+- **`/ascii [concept]`** — if a question involves a visual concept and the student got it wrong, offer to illustrate it.
 - **`/challenge [topic]`** — for hands-on practice after quiz identifies weak areas.
 - **`/progress`** — student can check their overall dashboard.
 - **`/save-progress`** — quiz results are auto-saved, but student can explicitly save mid-session.

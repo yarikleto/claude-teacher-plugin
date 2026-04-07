@@ -11,7 +11,7 @@
 <p align="center">
   <a href="#installation"><img src="https://img.shields.io/badge/Claude_Code-plugin-blue?style=flat-square" alt="Claude Code Plugin"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License"/></a>
-  <a href="#skills"><img src="https://img.shields.io/badge/skills-9-orange?style=flat-square" alt="9 Skills"/></a>
+  <a href="#skills"><img src="https://img.shields.io/badge/skills-11-orange?style=flat-square" alt="11 Skills"/></a>
   <a href="#hooks"><img src="https://img.shields.io/badge/hooks-5-purple?style=flat-square" alt="5 Hooks"/></a>
 </p>
 
@@ -108,10 +108,33 @@ Q1 (medium): What is the difference between a Roth IRA and a Traditional IRA?
 | **Full recording** | Every question, answer, and score saved to the grade book |
 | **Auto-promotion** | Score ≥80% → promotes toward Solid. <50% → demotes to Weak |
 
-### `/illustrate [concept]` — ASCII Diagrams
+### `/demo [concept]` — Animated Interactive Visualizations
 
 ```
-> /illustrate compound interest over time
+> /demo TCP 3-way handshake
+
+Saved: docs/tcp-3-way-handshake.html
+Open in any browser — no server needed.
+```
+
+Generates a self-contained `.html` file with step-by-step animated diagrams. Play/pause, prev/next controls, keyboard shortcuts (arrows + space), speed control, and an explanation panel that updates with each step. Dark theme, responsive, works offline. 6 styles: protocol flows, algorithm traces, state machines, data flow pipelines, memory/stack visualizations, network topology.
+
+### `/excalidraw [concept]` — Interactive Excalidraw Diagrams
+
+```
+> /excalidraw TCP 3-way handshake
+
+Saved: docs/tcp-3-way-handshake.excalidraw
+
+Open in VS Code (Excalidraw extension) or at excalidraw.com
+```
+
+Generates editable `.excalidraw` JSON diagrams with color-coded elements, proper arrow bindings, and semantic layout. 5 styles: sequence diagrams, flowcharts, architecture layers, data structures, side-by-side comparisons. Researches sources before drawing. Diagrams are fully interactive — move, edit, annotate, export.
+
+### `/ascii [concept]` — ASCII Diagrams
+
+```
+> /ascii compound interest over time
 
   $1000 @ 10%/year
 
@@ -290,7 +313,8 @@ The tutor calibrates vocabulary and examples automatically:
 Day 1:
   /init-edu                      Onboarding — name, age, background, ideal teacher, topic
   "explain compound interest"    Researches, explains with your analogies, saves to docs/
-  /illustrate growth over time   ASCII chart + sources
+  /ascii growth over time         ASCII chart + sources
+  /demo TCP handshake               Animated step-by-step in browser
   /challenge                     "Allocate $500/month. Justify your split."
   /summary                       Recap + spaced repetition schedule
 

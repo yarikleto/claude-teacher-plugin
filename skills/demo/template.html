@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>__TITLE__ — Claude Teacher</title>
+
+  <!-- CDN: Bootstrap 5 (CSS + Icons) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    /* ═══════════════════════════════════════════════
+       TEMPLATE STYLES — DO NOT MODIFY
+       ═══════════════════════════════════════════════ */
+    :root {
+      --bg: #0f0f1a;
+      --bg-gradient: linear-gradient(145deg, #0f0f1a 0%, #1a1a2e 50%, #151528 100%);
+      --surface: #1a1f36;
+      --surface-hover: #212745;
+      --surface-border: rgba(255, 255, 255, 0.06);
+      --primary: #0f3460;
+      --accent: #e94560;
+      --accent-glow: rgba(233, 69, 96, 0.3);
+      --text: #f0f0f5;
+      --text-muted: #8b8fa3;
+      --text-dim: #5a5e73;
+      --success: #4ecca3;
+      --warning: #f0c040;
+      --error: #e94560;
+      --info: #4ea8de;
+      --node-a: #4ea8de;
+      --node-b: #4ecca3;
+      --node-c: #f0c040;
+      --data: #c084fc;
+      --btn-bg: rgba(15, 52, 96, 0.6);
+      --btn-hover: rgba(26, 74, 128, 0.8);
+      --btn-active: #e94560;
+      --radius: 10px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+      --shadow-glow: 0 0 30px rgba(233, 69, 96, 0.15);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      background: var(--bg);
+      background-image: var(--bg-gradient);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 24px 16px;
+      min-height: 100vh;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ── Header ─────────────────────────────────── */
+    .header {
+      text-align: center;
+      padding: 8px 0 4px;
+    }
+    .header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--text) 0%, var(--info) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0;
+      font-weight: 400;
+    }
+
+    /* ── Canvas ─────────────────────────────────── */
+    .canvas-wrap {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid var(--surface-border);
+      box-shadow: var(--shadow-md);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* ── Progress bar ──────────────────────────── */
+    .progress-bar {
+      height: 3px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--data));
+      border-radius: 2px;
+      transition: width 0.25s ease;
+    }
+
+    /* ── Controls ───────────────────────────────── */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--surface-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn {
+      background: var(--btn-bg);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 44px;
+      backdrop-filter: blur(4px);
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn i { font-size: 1rem; }
+    .btn:hover {
+      background: var(--btn-hover);
+      border-color: rgba(255, 255, 255, 0.12);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .btn:active { transform: translateY(0); box-shadow: none; }
+    .btn.active {
+      background: var(--btn-active);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .step-info {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+      min-width: 120px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .speed-group {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+      margin-left: auto;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: var(--radius);
+      padding: 3px;
+    }
+    .speed-group .label {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin: 0 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .speed-btn {
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-radius: 7px;
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-weight: 500;
+    }
+    .speed-btn:hover { background: rgba(255, 255, 255, 0.08); color: var(--text); }
+    .speed-btn.active {
+      background: var(--primary);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* ── Step title ─────────────────────────────── */
+    .step-title {
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--accent);
+      min-height: 1.4em;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Explanation panel ──────────────────────── */
+    .explanation {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 18px 24px;
+      font-size: 0.92rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      min-height: 60px;
+      border: 1px solid var(--surface-border);
+      border-left: 3px solid var(--accent);
+    }
+
+    /* ── Keyboard hint ──────────────────────────── */
+    .kbd-hint {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .kbd-hint kbd {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: inherit;
+      font-size: 0.7rem;
+      margin: 0 1px;
+    }
+
+    /* ── Footer ─────────────────────────────────── */
+    .footer {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      padding: 12px 0 4px;
+    }
+    .footer a {
+      color: var(--info);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer a:hover { color: var(--text); text-decoration: underline; }
+
+    /* ── Responsive ─────────────────────────────── */
+    @media (max-width: 600px) {
+      body { padding: 12px 8px; }
+      #app { gap: 10px; }
+      .header h1 { font-size: 1.3rem; }
+      .controls { padding: 10px; gap: 6px; }
+      .btn { padding: 7px 12px; font-size: 0.8rem; }
+      .btn span { display: none; } /* hide labels, keep icons */
+      .explanation { padding: 14px 16px; font-size: 0.88rem; }
+      .speed-group .label { display: none; }
+    }
+
+    /* ═══════════════════════════════════════════════
+       CUSTOM STYLES — add concept-specific CSS here
+       ═══════════════════════════════════════════════ */
+    /* __CUSTOM_CSS__ */
+  </style>
+</head>
+<body>
+
+  <div id="app"></div>
+
+  <!-- CDN: Preact + HTM (UMD — works with file:// protocol) -->
+  <script src="https://cdn.jsdelivr.net/npm/preact@10.25.4/dist/preact.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/preact@10.25.4/hooks/dist/hooks.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+
+  <script>
+    const { h, render } = preact;
+    const { useState, useEffect, useRef, useCallback } = preactHooks;
+    const html = htm.bind(h);
+
+    /* ═══════════════════════════════════════════════
+       DRAWING LIBRARY
+       Helpers for Canvas 2D drawing. All functions
+       operate on the passed `ctx` and use CSS vars
+       for theming. Dimensions W/H are set by the engine.
+       ═══════════════════════════════════════════════ */
+
+    const _colorCache = {};
+    function color(varName) {
+      if (_colorCache[varName]) return _colorCache[varName];
+      const v = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+      _colorCache[varName] = v;
+      return v;
+    }
+
+    // ── Shapes ────────────────────────────────────
+
+    /** Rounded rectangle (filled + optional stroke) */
+    function drawBox(ctx, x, y, w, h, opts = {}) {
+      const { fill = color('--surface'), stroke = null, lineWidth = 2, radius = 8, opacity = 1 } = opts;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, radius);
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lineWidth; ctx.stroke(); }
+      ctx.restore();
+    }
+
+    /** Circle (filled + optional stroke) */
+    function drawCircle(ctx, x, y, r, opts = {}) {
+      const { fill = color('--node-a'), stroke = null, lineWidth = 2, opacity = 1 } = opts;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lineWidth; ctx.stroke(); }
+      ctx.restore();
+    }
+
+    /** Diamond shape centered at (cx, cy) */
+    function drawDiamond(ctx, cx, cy, w, h, opts = {}) {
+      const { fill = color('--warning'), stroke = null, lineWidth = 2, opacity = 1 } = opts;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - h / 2);
+      ctx.lineTo(cx + w / 2, cy);
+      ctx.lineTo(cx, cy + h / 2);
+      ctx.lineTo(cx - w / 2, cy);
+      ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lineWidth; ctx.stroke(); }
+      ctx.restore();
+    }
+
+    // ── Text ──────────────────────────────────────
+
+    /** Draw text with full control */
+    function drawText(ctx, text, x, y, opts = {}) {
+      const {
+        size = 14, weight = '400', fillColor = color('--text'),
+        align = 'center', baseline = 'middle', maxWidth, opacity = 1
+      } = opts;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = fillColor;
+      ctx.font = `${weight} ${size}px 'Inter', system-ui, sans-serif`;
+      ctx.textAlign = align;
+      ctx.textBaseline = baseline;
+      if (maxWidth) ctx.fillText(text, x, y, maxWidth);
+      else ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    /** Label inside a pill/badge shape */
+    function drawPill(ctx, text, x, y, opts = {}) {
+      const { fill = color('--primary'), textColor = color('--text'), size = 12, px = 12, py = 4 } = opts;
+      ctx.font = `500 ${size}px 'Inter', system-ui, sans-serif`;
+      const tw = ctx.measureText(text).width;
+      const pw = tw + px * 2;
+      const ph = size + py * 2;
+      drawBox(ctx, x - pw / 2, y - ph / 2, pw, ph, { fill, radius: ph / 2 });
+      drawText(ctx, text, x, y, { size, weight: '500', fillColor: textColor });
+    }
+
+    // ── Lines & Arrows ────────────────────────────
+
+    /** Arrow with arrowhead */
+    function drawArrow(ctx, x1, y1, x2, y2, opts = {}) {
+      const { strokeColor = color('--text-muted'), lineWidth = 2, headSize = 10, dash = null, opacity = 1 } = opts;
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.beginPath();
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = lineWidth;
+      if (dash) ctx.setLineDash(dash);
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = strokeColor;
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - headSize * Math.cos(angle - 0.4), y2 - headSize * Math.sin(angle - 0.4));
+      ctx.lineTo(x2 - headSize * Math.cos(angle + 0.4), y2 - headSize * Math.sin(angle + 0.4));
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    /** Dashed line (no arrowhead) */
+    function drawDashedLine(ctx, x1, y1, x2, y2, opts = {}) {
+      const { strokeColor = color('--text-muted'), lineWidth = 1, dash = [6, 4], opacity = 1 } = opts;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.setLineDash(dash);
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+
+    /** Solid line (no arrowhead) */
+    function drawLine(ctx, x1, y1, x2, y2, opts = {}) {
+      const { strokeColor = color('--text-muted'), lineWidth = 2, opacity = 1 } = opts;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    /** Curved arrow (quadratic bezier) */
+    function drawCurvedArrow(ctx, x1, y1, cpx, cpy, x2, y2, opts = {}) {
+      const { strokeColor = color('--text-muted'), lineWidth = 2, headSize = 10, opacity = 1 } = opts;
+      const angle = Math.atan2(y2 - cpy, x2 - cpx);
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.quadraticCurveTo(cpx, cpy, x2, y2);
+      ctx.stroke();
+      ctx.fillStyle = strokeColor;
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - headSize * Math.cos(angle - 0.4), y2 - headSize * Math.sin(angle - 0.4));
+      ctx.lineTo(x2 - headSize * Math.cos(angle + 0.4), y2 - headSize * Math.sin(angle + 0.4));
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // ── Animation helpers ─────────────────────────
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function easeInOut(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+    function easeOut(t) { return 1 - (1 - t) * (1 - t); }
+    function easeIn(t) { return t * t; }
+
+    /** Clamp value between min and max */
+    function clamp(val, min, max) { return Math.min(max, Math.max(min, val)); }
+
+    /** Sub-progress: map a portion of 0-1 to its own 0-1 range */
+    function subProgress(progress, start, end) {
+      return clamp((progress - start) / (end - start), 0, 1);
+    }
+
+    /** Animated moving packet/message between two points */
+    function drawMovingPacket(ctx, x1, y1, x2, y2, progress, label, opts = {}) {
+      const { fill = color('--data'), textColor = '#fff', size = 13, width = 80, height = 28 } = opts;
+      const t = easeInOut(clamp(progress, 0, 1));
+      const x = lerp(x1, x2, t);
+      const y = lerp(y1, y2, t);
+      // Shadow for depth
+      ctx.save();
+      ctx.shadowColor = fill;
+      ctx.shadowBlur = 12;
+      drawBox(ctx, x - width / 2, y - height / 2, width, height, { fill, radius: height / 2 });
+      ctx.restore();
+      drawText(ctx, label, x, y, { size, weight: '600', fillColor: textColor });
+    }
+
+    /** Glow effect wrapper */
+    function withGlow(ctx, drawFn, glowColor = color('--accent'), blur = 15) {
+      ctx.save();
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = blur;
+      drawFn();
+      ctx.restore();
+    }
+
+    /** Pulsing opacity (for highlighting) */
+    function pulse(time, speed = 2) {
+      return 0.5 + 0.5 * Math.sin(time * speed * Math.PI);
+    }
+
+    // ── Expose drawing library globally ───────────
+    // So content section can use them without imports
+    Object.assign(window, {
+      color, drawBox, drawCircle, drawDiamond, drawText, drawPill,
+      drawArrow, drawDashedLine, drawLine, drawCurvedArrow,
+      lerp, easeInOut, easeOut, easeIn, clamp, subProgress,
+      drawMovingPacket, withGlow, pulse
+    });
+
+
+    /* ═══════════════════════════════════════════════
+       CONTENT — FILL THIS SECTION
+
+       You MUST define:
+       1. STEPS array — each step is:
+          { title, explain, draw(ctx, progress, W, H, stepIndex) }
+
+       2. (optional) drawBackground(ctx, W, H)
+          — static elements drawn every frame behind everything
+
+       3. (optional) drawOverlay(ctx, W, H, currentStep, progress)
+          — drawn on top every frame
+
+       Drawing library (all take ctx as first arg):
+         Shapes:    drawBox, drawCircle, drawDiamond
+         Text:      drawText, drawPill
+         Lines:     drawArrow, drawDashedLine, drawLine, drawCurvedArrow
+         Animate:   drawMovingPacket, withGlow, pulse
+         Math:      lerp, easeInOut, easeOut, easeIn, clamp, subProgress
+         Theme:     color('--var-name')
+
+       Use relative positions: W * 0.25, H * 0.1, etc.
+       Use subProgress(progress, 0, 0.5) to sequence
+       animations within a single step.
+       ═══════════════════════════════════════════════ */
+
+    // __CONTENT_START__
+
+    const STEPS = [
+      {
+        title: "Example step",
+        explain: "Replace this with your steps. Open the template docs in SKILL.md for the full API reference.",
+        draw(ctx, progress, W, H) {
+          drawBox(ctx, W * 0.25, H * 0.25, W * 0.5, H * 0.5, {
+            fill: color('--primary'), stroke: color('--accent'),
+          });
+          drawText(ctx, 'Replace me', W * 0.5, H * 0.5, { size: 20, weight: '600' });
+          // Example animation: pill fades in
+          const fadeIn = easeOut(progress);
+          drawPill(ctx, 'animated', W * 0.5, H * 0.8, {
+            fill: color('--data'), textColor: '#fff',
+          });
+        }
+      }
+    ];
+
+    // function drawBackground(ctx, W, H) { }
+    // function drawOverlay(ctx, W, H, currentStep, progress) { }
+
+    // __CONTENT_END__
+
+
+    /* ═══════════════════════════════════════════════
+       APP COMPONENT — DO NOT MODIFY
+       Preact component handles all UI: canvas, controls,
+       step navigation, keyboard, speed, progress bar.
+       ═══════════════════════════════════════════════ */
+
+    function App() {
+      const canvasRef = useRef(null);
+      const wrapRef = useRef(null);
+      const [step, setStep] = useState(0);
+      const [playing, setPlaying] = useState(false);
+      const [speed, setSpeed] = useState(1);
+      const animRef = useRef({ progress: 0, pauseTimer: 0, lastTs: null });
+      const dimsRef = useRef({ W: 0, H: 0 });
+
+      // Canvas setup
+      const setupCanvas = useCallback(() => {
+        const cvs = canvasRef.current;
+        const wrap = wrapRef.current;
+        if (!cvs || !wrap) return;
+        const dpr = window.devicePixelRatio || 1;
+        const rect = wrap.getBoundingClientRect();
+        const W = rect.width;
+        const H = W * 0.56;
+        cvs.width = W * dpr;
+        cvs.height = H * dpr;
+        cvs.style.width = W + 'px';
+        cvs.style.height = H + 'px';
+        const ctx = cvs.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        dimsRef.current = { W, H };
+      }, []);
+
+      // Render frame
+      const renderFrame = useCallback(() => {
+        const cvs = canvasRef.current;
+        if (!cvs) return;
+        const ctx = cvs.getContext('2d');
+        const { W, H } = dimsRef.current;
+        ctx.clearRect(0, 0, W, H);
+
+        if (typeof window.drawBackground === 'function') window.drawBackground(ctx, W, H);
+
+        const currentStep = step;
+        for (let i = 0; i < currentStep; i++) {
+          if (STEPS[i]?.draw) STEPS[i].draw(ctx, 1, W, H, i);
+        }
+        if (STEPS[currentStep]?.draw) {
+          STEPS[currentStep].draw(ctx, animRef.current.progress, W, H, currentStep);
+        }
+
+        if (typeof window.drawOverlay === 'function') {
+          window.drawOverlay(ctx, W, H, currentStep, animRef.current.progress);
+        }
+      }, [step]);
+
+      // Animation loop
+      useEffect(() => {
+        setupCanvas();
+        window.addEventListener('resize', setupCanvas);
+
+        let rafId;
+        const tick = (ts) => {
+          const a = animRef.current;
+          if (a.lastTs === null) a.lastTs = ts;
+          const dt = (ts - a.lastTs) / 1000;
+          a.lastTs = ts;
+
+          if (playing) {
+            if (a.progress < 1) {
+              a.progress = Math.min(1, a.progress + dt / speed);
+            } else {
+              a.pauseTimer += dt;
+              if (a.pauseTimer >= 0.5) {
+                if (step < STEPS.length - 1) {
+                  a.progress = 0;
+                  a.pauseTimer = 0;
+                  setStep(s => s + 1);
+                } else {
+                  setPlaying(false);
+                }
+              }
+            }
+          }
+
+          renderFrame();
+          rafId = requestAnimationFrame(tick);
+        };
+
+        rafId = requestAnimationFrame(tick);
+        return () => {
+          cancelAnimationFrame(rafId);
+          window.removeEventListener('resize', setupCanvas);
+        };
+      }, [step, playing, speed, setupCanvas, renderFrame]);
+
+      // Navigation
+      const goNext = useCallback(() => {
+        if (step < STEPS.length - 1) {
+          animRef.current = { progress: 0, pauseTimer: 0, lastTs: null };
+          setStep(s => s + 1);
+        }
+      }, [step]);
+
+      const goPrev = useCallback(() => {
+        if (step > 0) {
+          animRef.current = { progress: 1, pauseTimer: 0, lastTs: null };
+          setStep(s => s - 1);
+        }
+      }, [step]);
+
+      const togglePlay = useCallback(() => {
+        if (!playing && step === STEPS.length - 1 && animRef.current.progress >= 1) {
+          animRef.current = { progress: 0, pauseTimer: 0, lastTs: null };
+          setStep(0);
+          setPlaying(true);
+        } else {
+          animRef.current.lastTs = null;
+          setPlaying(p => !p);
+        }
+      }, [playing, step]);
+
+      const resetAll = useCallback(() => {
+        setPlaying(false);
+        animRef.current = { progress: 0, pauseTimer: 0, lastTs: null };
+        setStep(0);
+      }, []);
+
+      // Keyboard
+      useEffect(() => {
+        const onKey = (e) => {
+          if (e.key === 'ArrowRight') { goNext(); e.preventDefault(); }
+          if (e.key === 'ArrowLeft') { goPrev(); e.preventDefault(); }
+          if (e.key === ' ') { togglePlay(); e.preventDefault(); }
+          if (e.key.toLowerCase() === 'r') { resetAll(); e.preventDefault(); }
+        };
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+      }, [goNext, goPrev, togglePlay, resetAll]);
+
+      const current = STEPS[step] || {};
+      const pct = ((step + animRef.current.progress) / STEPS.length) * 100;
+      const speeds = [
+        { val: 2, label: 'Slow', icon: 'bi-chevron-right' },
+        { val: 1, label: 'Normal', icon: 'bi-forward' },
+        { val: 0.4, label: 'Fast', icon: 'bi-lightning-charge' },
+      ];
+
+      return html`
+        <div class="header">
+          <h1>__TITLE__</h1>
+          <p class="subtitle">__SUBTITLE__</p>
+        </div>
+
+        <div class="canvas-wrap" ref=${wrapRef}>
+          <canvas ref=${canvasRef}></canvas>
+        </div>
+
+        <div class="progress-bar">
+          <div class="progress-fill" style=${{ width: pct + '%' }}></div>
+        </div>
+
+        <div class="controls">
+          <button class="btn" onClick=${goPrev} disabled=${step === 0} title="Previous (←)">
+            <i class="bi bi-skip-backward-fill"></i><span>Prev</span>
+          </button>
+          <button class="btn ${playing ? 'active' : ''}" onClick=${togglePlay} title="Play / Pause (Space)">
+            <i class="bi ${playing ? 'bi-pause-fill' : 'bi-play-fill'}"></i>
+            <span>${playing ? 'Pause' : 'Play'}</span>
+          </button>
+          <button class="btn" onClick=${goNext} disabled=${step === STEPS.length - 1} title="Next (→)">
+            <i class="bi bi-skip-forward-fill"></i><span>Next</span>
+          </button>
+          <button class="btn" onClick=${resetAll} title="Reset (R)">
+            <i class="bi bi-arrow-counterclockwise"></i>
+          </button>
+
+          <div class="step-info">Step ${step + 1} of ${STEPS.length}</div>
+
+          <div class="speed-group">
+            <span class="label">Speed</span>
+            ${speeds.map(s => html`
+              <button class="speed-btn ${speed === s.val ? 'active' : ''}"
+                onClick=${() => setSpeed(s.val)} title=${s.label}>
+                <i class="bi ${s.icon}"></i>
+              </button>
+            `)}
+          </div>
+        </div>
+
+        <div class="step-title">${current.title || ''}</div>
+        <div class="explanation">${current.explain || ''}</div>
+
+        <div class="kbd-hint">
+          <kbd>←</kbd> <kbd>→</kbd> navigate
+          <kbd>Space</kbd> play/pause
+          <kbd>R</kbd> reset
+        </div>
+
+        <div class="footer">
+          __SOURCE_HTML__
+          <br/>Generated by Claude Teacher
+        </div>
+      `;
+    }
+
+    render(html`<${App} />`, document.getElementById('app'));
+  </script>
+</body>
+</html>
