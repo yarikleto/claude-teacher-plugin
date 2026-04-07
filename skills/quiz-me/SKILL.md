@@ -32,7 +32,7 @@ Determine topic → Check for unresolved misconceptions → Ask question → Wai
 ## Rules
 
 1. **One question per message.** Never batch questions.
-2. **Mix formats:** Alternate between multiple-choice (4 options) and open-ended. Use multiple-choice for factual recall, open-ended for conceptual understanding.
+2. **Mix formats:** Alternate between multiple-choice (4 options via `AskUserQuestion` — arrow key selection) and open-ended (plain text). Use multiple-choice for factual recall, open-ended for conceptual understanding.
 3. **Grade fairly:** For open-ended answers, accept correct reasoning even if wording is imprecise. If partially correct, say what was right and what was missing.
 4. **Explain after every answer:** Whether right or wrong, give a brief explanation of WHY the correct answer is correct. This is the learning moment. **Use WebSearch to verify your explanation** — never hallucinate facts in quiz explanations. Include a source link when citing specific facts.
 5. **Adapt difficulty:** Start medium. If the user gets 2+ right in a row, increase difficulty. If they get 2+ wrong, ease up and cover fundamentals.
@@ -46,20 +46,40 @@ Determine topic → Check for unresolved misconceptions → Ask question → Wai
 
 ## Question Format
 
-**Multiple choice:**
-```
-Q3 (medium): What system call creates a new socket in C?
+**Multiple choice — use `AskUserQuestion` tool:**
 
-  a) connect()
-  b) socket()
-  c) bind()
-  d) listen()
+For every multiple-choice question, use the `AskUserQuestion` tool so the student can select answers with arrow keys. This is MANDATORY — never print multiple-choice options as plain text.
+
+```
+AskUserQuestion({
+  questions: [{
+    question: "Q3 (medium): What system call creates a new socket in C?",
+    header: "Q3",
+    multiSelect: false,
+    options: [
+      { label: "a) connect()", description: "Initiates a connection to a remote address" },
+      { label: "b) socket()", description: "Creates an endpoint for communication" },
+      { label: "c) bind()", description: "Assigns an address to a socket" },
+      { label: "d) listen()", description: "Marks a socket as passive, waiting for connections" }
+    ]
+  }]
+})
 ```
 
-**Open-ended:**
+The student selects with arrow keys and Enter — no typing needed. The descriptions in each option serve as subtle hints that help learning even during the quiz.
+
+**Rules for AskUserQuestion quiz options:**
+- Always provide exactly 4 options for multiple choice
+- Randomize correct answer position (don't always put it in slot b)
+- Write short, educational descriptions for each option — these teach even as the student reads the choices
+- The `header` field should be the question number (e.g., "Q1", "Q2")
+- If the student selects "Other" (custom input), treat it as an open-ended answer
+
+**Open-ended — use plain text:**
 ```
 Q4 (medium): In your own words, explain why FTP uses two separate TCP connections instead of one.
 ```
+Open-ended questions are printed as plain text — the student types their answer freely.
 
 ## After Each Answer
 
