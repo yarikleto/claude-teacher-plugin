@@ -11,272 +11,80 @@
 
   <style>
     /* ═══════════════════════════════════════════════
-       TEMPLATE STYLES — DO NOT MODIFY
+       Theme variables + overrides Bootstrap can't do.
+       Everything else uses Bootstrap utilities.
        ═══════════════════════════════════════════════ */
     :root {
-      --bg: #0f0f1a;
-      --bg-gradient: linear-gradient(145deg, #0f0f1a 0%, #1a1a2e 50%, #151528 100%);
-      --surface: #1a1f36;
-      --surface-hover: #212745;
-      --surface-border: rgba(255, 255, 255, 0.06);
-      --primary: #0f3460;
-      --accent: #e94560;
-      --accent-glow: rgba(233, 69, 96, 0.3);
-      --text: #f0f0f5;
-      --text-muted: #8b8fa3;
-      --text-dim: #5a5e73;
-      --success: #4ecca3;
-      --warning: #f0c040;
-      --error: #e94560;
-      --info: #4ea8de;
+      /* Canvas drawing colors (used by JS, not CSS) */
       --node-a: #4ea8de;
       --node-b: #4ecca3;
       --node-c: #f0c040;
       --data: #c084fc;
-      --btn-bg: rgba(15, 52, 96, 0.6);
-      --btn-hover: rgba(26, 74, 128, 0.8);
-      --btn-active: #e94560;
-      --radius: 10px;
-      --radius-lg: 16px;
-      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-      --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
-      --shadow-glow: 0 0 30px rgba(233, 69, 96, 0.15);
+      --accent: #e94560;
+      --accent-glow: rgba(233, 69, 96, 0.3);
+      --success: #4ecca3;
+      --warning: #f0c040;
+      --error: #e94560;
+      --info: #4ea8de;
+      --surface: #1a1f36;
+      --primary: #0f3460;
+      --text: #f0f0f5;
+      --text-muted: #8b8fa3;
+      --text-dim: #5a5e73;
     }
-    *, *::before, *::after { box-sizing: border-box; }
 
     body {
-      font-family: 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      margin: 0;
-      background: var(--bg);
-      background-image: var(--bg-gradient);
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      padding: 24px 16px;
+      background: linear-gradient(145deg, #0f0f1a 0%, #1a1a2e 50%, #151528 100%);
       min-height: 100vh;
     }
 
-    #app {
-      width: 100%;
-      max-width: 960px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    /* ── Header ─────────────────────────────────── */
-    .header {
-      text-align: center;
-      padding: 8px 0 4px;
-    }
-    .header h1 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      margin: 0 0 6px;
-      letter-spacing: -0.02em;
+    /* Gradient title — Bootstrap can't do this */
+    .gradient-title {
       background: linear-gradient(135deg, var(--text) 0%, var(--info) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .header .subtitle {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin: 0;
-      font-weight: 400;
-    }
 
-    /* ── Canvas ─────────────────────────────────── */
+    /* Canvas container */
     .canvas-wrap {
       background: var(--surface);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      position: relative;
-      border: 1px solid var(--surface-border);
-      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
-    canvas {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
+    canvas { display: block; width: 100%; height: auto; }
 
-    /* ── Progress bar ──────────────────────────── */
-    .progress-bar {
-      height: 3px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
+    /* Accent progress gradient — Bootstrap progress is solid color */
+    .progress-accent .progress-bar {
       background: linear-gradient(90deg, var(--accent), var(--data));
-      border-radius: 2px;
-      transition: width 0.25s ease;
     }
 
-    /* ── Controls ───────────────────────────────── */
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px 16px;
+    /* Explanation panel accent border */
+    .explanation-panel {
       background: var(--surface);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--surface-border);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .btn {
-      background: var(--btn-bg);
-      color: var(--text);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: var(--radius);
-      padding: 8px 18px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      min-width: 44px;
-      backdrop-filter: blur(4px);
-      user-select: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn i { font-size: 1rem; }
-    .btn:hover {
-      background: var(--btn-hover);
-      border-color: rgba(255, 255, 255, 0.12);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-    .btn:active { transform: translateY(0); box-shadow: none; }
-    .btn.active {
-      background: var(--btn-active);
-      border-color: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
-    }
-    .btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-      transform: none !important;
-      box-shadow: none !important;
-    }
-    .btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    .step-info {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      text-align: center;
-      min-width: 120px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .speed-group {
-      display: flex;
-      gap: 2px;
-      align-items: center;
-      margin-left: auto;
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: var(--radius);
-      padding: 3px;
-    }
-    .speed-group .label {
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      margin: 0 6px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-    .speed-btn {
-      background: transparent;
-      color: var(--text-muted);
-      border: none;
-      border-radius: 7px;
-      padding: 5px 10px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      font-weight: 500;
-    }
-    .speed-btn:hover { background: rgba(255, 255, 255, 0.08); color: var(--text); }
-    .speed-btn.active {
-      background: var(--primary);
-      color: var(--text);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-
-    /* ── Step title ─────────────────────────────── */
-    .step-title {
-      text-align: center;
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--accent);
-      min-height: 1.4em;
-      letter-spacing: -0.01em;
-    }
-
-    /* ── Explanation panel ──────────────────────── */
-    .explanation {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
-      padding: 18px 24px;
-      font-size: 0.92rem;
-      line-height: 1.7;
-      color: var(--text-muted);
-      min-height: 60px;
-      border: 1px solid var(--surface-border);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       border-left: 3px solid var(--accent);
     }
 
-    /* ── Keyboard hint ──────────────────────────── */
-    .kbd-hint {
-      text-align: center;
-      font-size: 0.72rem;
-      color: var(--text-dim);
+    /* Speed group pill */
+    .speed-group {
+      background: rgba(0, 0, 0, 0.25);
     }
-    .kbd-hint kbd {
-      display: inline-block;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      padding: 1px 6px;
-      font-family: inherit;
-      font-size: 0.7rem;
-      margin: 0 1px;
+    .speed-group .btn-speed.active {
+      background: var(--primary) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
 
-    /* ── Footer ─────────────────────────────────── */
-    .footer {
-      text-align: center;
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      padding: 12px 0 4px;
+    /* Active play button glow */
+    .btn-glow.active {
+      background-color: var(--accent) !important;
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 12px var(--accent-glow);
     }
-    .footer a {
-      color: var(--info);
-      text-decoration: none;
-      transition: color 0.15s;
-    }
-    .footer a:hover { color: var(--text); text-decoration: underline; }
 
-    /* ── Responsive ─────────────────────────────── */
-    @media (max-width: 600px) {
-      body { padding: 12px 8px; }
-      #app { gap: 10px; }
-      .header h1 { font-size: 1.3rem; }
-      .controls { padding: 10px; gap: 6px; }
-      .btn { padding: 7px 12px; font-size: 0.8rem; }
-      .btn span { display: none; } /* hide labels, keep icons */
-      .explanation { padding: 14px 16px; font-size: 0.88rem; }
-      .speed-group .label { display: none; }
+    /* Responsive: hide button labels on mobile, keep icons */
+    @media (max-width: 576px) {
+      .btn-label { display: none; }
     }
 
     /* ═══════════════════════════════════════════════
@@ -285,9 +93,9 @@
     /* __CUSTOM_CSS__ */
   </style>
 </head>
-<body>
+<body class="d-flex justify-content-center p-3 text-light" data-bs-theme="dark">
 
-  <div id="app"></div>
+  <div id="app" class="d-flex flex-column gap-2 w-100" style="max-width: 960px;"></div>
 
   <!-- CDN: Preact + HTM (UMD — works with file:// protocol) -->
   <script src="https://cdn.jsdelivr.net/npm/preact@10.25.4/dist/preact.umd.js"></script>
@@ -734,40 +542,48 @@
       ];
 
       return html`
-        <div class="header">
-          <h1>__TITLE__</h1>
-          <p class="subtitle">__SUBTITLE__</p>
+        <div class="text-center py-2">
+          <h1 class="gradient-title fw-bold fs-3 mb-1">__TITLE__</h1>
+          <p class="text-secondary small mb-0">__SUBTITLE__</p>
         </div>
 
-        <div class="canvas-wrap" ref=${wrapRef}>
+        <div class="canvas-wrap rounded-4 overflow-hidden" ref=${wrapRef}>
           <canvas ref=${canvasRef}></canvas>
         </div>
 
-        <div class="progress-bar">
-          <div class="progress-fill" style=${{ width: pct + '%' }}></div>
+        <div class="progress progress-accent" style="height: 3px;">
+          <div class="progress-bar" style=${{ width: pct + '%', transition: 'width 0.25s ease' }}></div>
         </div>
 
-        <div class="controls">
-          <button class="btn" onClick=${goPrev} disabled=${step === 0} title="Previous (←)">
-            <i class="bi bi-skip-backward-fill"></i><span>Prev</span>
+        <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 p-3 rounded-4"
+             style="background: var(--surface); border: 1px solid rgba(255,255,255,0.06);">
+          <button class="btn btn-outline-light btn-sm d-inline-flex align-items-center gap-1"
+                  onClick=${goPrev} disabled=${step === 0} title="Previous (←)">
+            <i class="bi bi-skip-backward-fill"></i><span class="btn-label">Prev</span>
           </button>
-          <button class="btn ${playing ? 'active' : ''}" onClick=${togglePlay} title="Play / Pause (Space)">
+          <button class="btn btn-outline-light btn-sm btn-glow d-inline-flex align-items-center gap-1 ${playing ? 'active' : ''}"
+                  onClick=${togglePlay} title="Play / Pause (Space)">
             <i class="bi ${playing ? 'bi-pause-fill' : 'bi-play-fill'}"></i>
-            <span>${playing ? 'Pause' : 'Play'}</span>
+            <span class="btn-label">${playing ? 'Pause' : 'Play'}</span>
           </button>
-          <button class="btn" onClick=${goNext} disabled=${step === STEPS.length - 1} title="Next (→)">
-            <i class="bi bi-skip-forward-fill"></i><span>Next</span>
+          <button class="btn btn-outline-light btn-sm d-inline-flex align-items-center gap-1"
+                  onClick=${goNext} disabled=${step === STEPS.length - 1} title="Next (→)">
+            <i class="bi bi-skip-forward-fill"></i><span class="btn-label">Next</span>
           </button>
-          <button class="btn" onClick=${resetAll} title="Reset (R)">
+          <button class="btn btn-outline-light btn-sm" onClick=${resetAll} title="Reset (R)">
             <i class="bi bi-arrow-counterclockwise"></i>
           </button>
 
-          <div class="step-info">Step ${step + 1} of ${STEPS.length}</div>
+          <span class="text-secondary small ms-2" style="font-variant-numeric: tabular-nums; min-width: 100px;">
+            Step ${step + 1} of ${STEPS.length}
+          </span>
 
-          <div class="speed-group">
-            <span class="label">Speed</span>
+          <div class="speed-group d-flex align-items-center gap-1 rounded-3 p-1 ms-auto">
+            <small class="text-uppercase fw-semibold px-1 d-none d-sm-inline"
+                   style="font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.05em;">Speed</small>
             ${speeds.map(s => html`
-              <button class="speed-btn ${speed === s.val ? 'active' : ''}"
+              <button class="btn btn-sm btn-speed border-0 ${speed === s.val ? 'active' : ''}"
+                style="background: transparent; color: var(--text-muted); font-size: 0.78rem;"
                 onClick=${() => setSpeed(s.val)} title=${s.label}>
                 <i class="bi ${s.icon}"></i>
               </button>
@@ -775,19 +591,24 @@
           </div>
         </div>
 
-        <div class="step-title">${current.title || ''}</div>
-        <div class="explanation">${current.explain || ''}</div>
+        <div class="text-center fw-semibold" style="color: var(--accent); min-height: 1.4em;">
+          ${current.title || ''}
+        </div>
 
-        <div class="kbd-hint">
-          <kbd>←</kbd> <kbd>→</kbd> navigate
-          <kbd>Space</kbd> play/pause
+        <div class="explanation-panel rounded-4 p-3" style="color: var(--text-muted); line-height: 1.7; min-height: 60px;">
+          ${current.explain || ''}
+        </div>
+
+        <div class="text-center small" style="font-size: 0.72rem; color: var(--text-dim);">
+          <kbd>←</kbd> <kbd>→</kbd> navigate${' '}
+          <kbd>Space</kbd> play/pause${' '}
           <kbd>R</kbd> reset
         </div>
 
-        <div class="footer">
+        <footer class="text-center text-secondary" style="font-size: 0.75rem;">
           __SOURCE_HTML__
           <br/>Generated by Claude Teacher
-        </div>
+        </footer>
       `;
     }
 
