@@ -19,23 +19,17 @@ Gives the student a motivational boost with a real quote from a famous thinker, 
 
 ### Step 1: Fetch a Real Quote
 
-Fetch a quote from one of these free APIs using Bash with `curl`. Try them in order — use the first one that succeeds:
+Fetch a quote with Bash and `curl`, capping the wait so a slow network never stalls the lesson:
 
-**Primary — ZenQuotes:**
 ```bash
-curl -s "https://zenquotes.io/api/random" 2>/dev/null
+curl -s --max-time 5 "https://zenquotes.io/api/random" 2>/dev/null
 ```
 Response: `[{"q": "quote text", "a": "Author Name", "h": "..."}]`
 Extract: `q` = quote, `a` = author
 
-**Fallback — Forismatic:**
-```bash
-curl -s "https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang=en" 2>/dev/null
-```
-Response: `{"quoteText": "...", "quoteAuthor": "..."}`
-Extract: `quoteText` = quote, `quoteAuthor` = author
-
-If both APIs fail (network error, timeout), use a quote from the hardcoded fallback list below.
+If the request fails or times out, use a quote from the hardcoded fallback list below. Never
+invent a quote or attribute one to a person who did not say it — an unverifiable quote from a
+teacher costs more trust than it buys motivation.
 
 ### Step 2: Read Student Context
 

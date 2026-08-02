@@ -38,9 +38,9 @@ cd your-project
 claude plugins install claude-teacher --scope project
 ```
 
-**That's it.** Start a new Claude Code session — the plugin detects you're a new student and runs onboarding automatically. After that, just start learning.
+Then run `/init-edu` once in that project. It walks you through onboarding and marks the folder as a learning project.
 
-> Run `/init-edu` manually at any time to set up a new project or re-do onboarding.
+> Teaching mode activates only in projects you have run `/init-edu` in. Everywhere else Claude behaves normally, so you can install the plugin at user scope without turning every repo into a classroom.
 
 ---
 
@@ -80,7 +80,8 @@ The tutor will:
 
 **Project setup:**
 - `CLAUDE.md` — teacher persona + student profile + teaching rules adapted to your learning type
-- `.claude/settings.json` — output style + hooks + `defaultView: chat` (hides tool noise)
+- `.claude/claude-teacher.json` — marks the folder as a learning project, which is what activates the hooks
+- `.claude/settings.json` — sets the Explanatory output style
 - `docs/` — directory for saved explanations
 - Global education DB at `~/.local/share/claude-education/`
 
@@ -151,10 +152,10 @@ Researches both concepts via WebSearch before comparing. Includes a comparison t
 > /demo TCP 3-way handshake
 
 Saved: docs/tcp-3-way-handshake.html
-Open in any browser — no server needed.
+Open in any browser.
 ```
 
-Generates a self-contained `.html` file with step-by-step animated diagrams. Play/pause, prev/next controls, keyboard shortcuts (arrows + space), speed control, and an explanation panel that updates with each step. Dark theme, responsive, works offline. 6 styles: protocol flows, algorithm traces, state machines, data flow pipelines, memory/stack visualizations, network topology.
+Generates a single `.html` file with step-by-step animated diagrams. Play/pause, prev/next controls, keyboard shortcuts (arrows + space), speed control, and an explanation panel that updates with each step. Dark theme, responsive. Styling and the UI layer load from a CDN, so first open needs a network connection. 6 styles: protocol flows, algorithm traces, state machines, data flow pipelines, memory/stack visualizations, network topology.
 
 ### `/excalidraw [concept]` — Interactive Excalidraw Diagrams
 
@@ -239,7 +240,7 @@ You've conquered 3 topics this week. This one's no different
 — just needs a different angle.
 ```
 
-Real quotes fetched live from APIs (ZenQuotes, Forismatic). 18 verified fallback quotes from Feynman, Curie, Dijkstra, Turing, Knuth, Polya. **Auto-triggers** when the tutor detects frustration or repeated failures.
+Real quotes fetched live from the ZenQuotes API, with 18 verified fallbacks from Feynman, Curie, Dijkstra, Turing, Knuth, and Polya when the network is unavailable. **Auto-triggers** when the tutor detects frustration or repeated failures.
 
 ### `/summary` — Session Recap
 
@@ -295,15 +296,17 @@ Wipes everything: profile, quiz history, topic progress, session logs, saved doc
 
 ## Hooks
 
-5 hooks that automate the teaching workflow. Configured globally — work across all your learning projects.
+5 hooks that automate the teaching workflow. The plugin registers all of them itself, so they survive plugin updates — no per-project wiring.
+
+Every hook checks for `.claude/claude-teacher.json` first and exits silently when it is absent. Only projects you have run `/init-edu` in get tutor behavior.
 
 | Hook | Trigger | What it does |
 |------|---------|-------------|
 | **session-start-load-db** | Session start | Loads profile, calculates overdue topics with exact days, flags weak topics — tells Claude to quiz before teaching new material |
 | **inject-teach-context** | Every message | Injects teaching-mode rules into every prompt — keeps Claude in tutor mode, enforces research-before-explaining and auto-save |
-| **stop-save-progress** | Session end | Blocks session close and reminds Claude to save progress to the DB (only fires in learning projects) |
+| **stop-save-progress** | Session end | Reminds Claude to save progress to the DB before the turn ends |
 | **post-code-review** | After code edit | Reminds tutor to ask pedagogical questions instead of just moving on |
-| **post-quiz-motivate** | After code fails | Suggests encouragement when your code throws errors |
+| **post-quiz-motivate** | After a command fails | Suggests encouragement when your code throws errors |
 
 ---
 
@@ -313,7 +316,7 @@ Wipes everything: profile, quiz history, topic progress, session logs, saved doc
 
 | Type | Example | Claude focuses on |
 |------|---------|-------------------|
-| **Project** | FTP server, budget tracker, game | Skeletons, incremental building, hands-on review |
+| **Project** | FTP server, budget tracker, game | Incremental building, hands-on review — you write every line |
 | **Subject / field** | Finance, psychology, math, CS | Concepts, real-world scenarios, comparisons, "why it matters" |
 | **Exam prep** | OS exam, job interview, certification | Key concepts, practice questions, weak spots, timed drills |
 
@@ -432,6 +435,13 @@ claude plugins update claude-teacher@claude-teacher-marketplace --scope project
 ```
 
 Use the same `--scope` you used during install. Restart the session after updating.
+
+**Upgrading from 1.8.0 or earlier:** those versions wrote a `hooks` block into each project's
+`.claude/settings.json` containing absolute paths into the plugin cache. Those paths point at
+the previous version's directory and no longer resolve. Delete the `hooks` block from
+`.claude/settings.json` in each learning project, then run `/init-edu` there once — the plugin
+now supplies the hooks itself and adds the `.claude/claude-teacher.json` marker that scopes
+them to that project.
 
 ## Uninstall
 

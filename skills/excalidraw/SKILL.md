@@ -1,6 +1,7 @@
 ---
 name: excalidraw
 description: "Middle tier — complex STATIC diagrams. Use when user invokes /excalidraw, OR when concept has 5+ components, multi-layer architecture, or detailed data structures that benefit from editable layout. Generates .excalidraw JSON files opened in excalidraw.com or VS Code. For simple visuals use /ascii. For animated/dynamic concepts (protocol handshakes, algorithm traces) use /demo instead."
+argument-hint: "[concept]"
 ---
 
 # Excalidraw Diagram

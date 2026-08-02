@@ -1,6 +1,7 @@
 ---
 name: roadmap
 description: "Use when the student wants a visual learning roadmap for a goal or topic area — reads current knowledge state, researches the standard learning path, and generates an interactive .excalidraw diagram with color-coded topic nodes, prerequisite arrows, and milestone markers. Visual companion to /research."
+argument-hint: "[goal or topic area]"
 ---
 
 # Roadmap — Visual Learning Path Generator

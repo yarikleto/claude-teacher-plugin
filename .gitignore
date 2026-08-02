@@ -1,0 +1,5 @@
+.DS_Store
+*.log
+
+# Local Claude Code state, not part of the plugin
+.claude/settings.local.json

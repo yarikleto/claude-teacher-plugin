@@ -1,9 +1,15 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "claude-teacher",
+  "displayName": "Claude Teacher",
   "description": "The most attentive AI tutor — teaches any subject by guiding, tracks knowledge gaps, quizzes with spaced repetition, and adapts to your level",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "author": {
-    "name": "Yaroslav"
+    "name": "Yaroslav",
+    "url": "https://github.com/yarikleto"
   },
+  "homepage": "https://github.com/yarikleto/claude-teacher-plugin#readme",
+  "repository": "https://github.com/yarikleto/claude-teacher-plugin",
+  "license": "MIT",
   "keywords": ["education", "teaching", "tutor", "quiz", "learning", "study", "knowledge-tracking", "spaced-repetition", "adaptive-learning", "claude-code", "claude-plugin", "personal-tutor", "cs", "programming"]
 }

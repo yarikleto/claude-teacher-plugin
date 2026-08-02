@@ -1,6 +1,7 @@
 ---
 name: quiz-me
 description: Use when the user wants to be quizzed, tested, or asked questions on any topic — programming concepts, protocols, algorithms, tools, or any subject they are studying
+argument-hint: "[topic]"
 ---
 
 # Quiz Me

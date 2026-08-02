@@ -1,6 +1,7 @@
 ---
 name: demo
-description: "Use when the concept needs ANIMATION or INTERACTIVITY to be understood — step-by-step protocol flows, sorting algorithm traces, state machine transitions, network packet journeys, or anything where static images fall short. Generates a self-contained .html file with Canvas/SVG + JavaScript. Opens in any browser, zero dependencies. For static diagrams use /ascii (simple) or /excalidraw (complex)."
+description: "Use when the concept needs ANIMATION or INTERACTIVITY to be understood — step-by-step protocol flows, sorting algorithm traces, state machine transitions, network packet journeys, or anything where static images fall short. Generates a single .html file with Canvas/SVG + JavaScript that opens in any browser; styling and the UI layer load from a CDN. For static diagrams use /ascii (simple) or /excalidraw (complex)."
+argument-hint: "[concept]"
 ---
 
 # Demo — Interactive Animated Diagrams

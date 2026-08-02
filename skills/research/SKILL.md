@@ -1,6 +1,7 @@
 ---
 name: research
 description: "Use when the student has a task, project, or goal and needs a structured learning plan — researches prerequisites, finds authoritative resources (docs, articles, RFCs, tutorials), and saves a checklist-style study plan to a file. The student follows the plan at their own pace."
+argument-hint: "[task or project]"
 ---
 
 # Research — Study Plan Generator

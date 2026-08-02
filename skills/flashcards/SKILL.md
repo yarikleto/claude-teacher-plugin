@@ -1,6 +1,7 @@
 ---
 name: flashcards
 description: Use when the student wants to generate Anki-style flashcards from studied topics — creates question/answer cards in Markdown and Anki-compatible CSV, prioritized by weak areas and misconceptions. Cards saved to global education DB and project-local docs.
+argument-hint: "[topic]"
 ---
 
 # Flashcards — Anki-Style Card Generation

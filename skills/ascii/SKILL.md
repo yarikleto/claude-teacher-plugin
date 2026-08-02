@@ -1,6 +1,7 @@
 ---
 name: ascii
 description: "DEFAULT diagram skill — simplest tier. Use when user invokes /ascii OR when suggesting a quick visual. Creates ASCII art rendered inline in terminal — zero friction. Escalate to /excalidraw for complex static diagrams (5+ components, multi-layer). Escalate to /demo for animated/dynamic concepts (protocol handshakes, algorithm traces, state transitions)."
+argument-hint: "[concept]"
 ---
 
 # ASCII

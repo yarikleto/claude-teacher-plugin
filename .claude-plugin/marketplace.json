@@ -1,12 +1,20 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "claude-teacher-marketplace",
+  "description": "Personal-tutor plugins for Claude Code — adaptive teaching, knowledge tracking, and spaced repetition",
   "owner": {
-    "name": "yarikleto"
+    "name": "yarikleto",
+    "url": "https://github.com/yarikleto"
   },
   "plugins": [
     {
       "name": "claude-teacher",
+      "displayName": "Claude Teacher",
       "description": "The most attentive AI tutor — teaches, tracks knowledge, quizzes, and adapts to your level",
+      "category": "education",
+      "license": "MIT",
+      "homepage": "https://github.com/yarikleto/claude-teacher-plugin#readme",
+      "repository": "https://github.com/yarikleto/claude-teacher-plugin",
       "source": {
         "source": "github",
         "repo": "yarikleto/claude-teacher-plugin"

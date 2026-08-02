@@ -1,6 +1,7 @@
 ---
 name: reset-edu
 description: Delete all saved education data — student profile, quiz history, topic progress, session logs, and saved docs. Fresh start.
+disable-model-invocation: true
 ---
 
 # Reset Education Data

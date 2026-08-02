@@ -119,79 +119,38 @@ Only after they answer Question 1, ask Question 2:
 What's the topic? (e.g., "personal finance", "linear algebra", "machine learning", "FTP server in C++")
 ```
 
-### Step 4: Configure Claude Settings
-
-Create or update `.claude/settings.json` — merge `outputStyle` and `hooks`, do NOT overwrite existing settings:
+### Step 4: Mark the Project and Configure Settings
 
 ```bash
 mkdir -p .claude
 ```
 
-Find the plugin's installed hooks directory. It will be inside the plugin installation path under `hooks/`. Use this to resolve absolute paths for the hook scripts:
-
-```bash
-PLUGIN_DIR=$(find ~/.claude -path "*/claude-teacher-plugin/hooks" -type d 2>/dev/null | head -1)
-# Fallback for profile-based installs
-[ -z "$PLUGIN_DIR" ] && PLUGIN_DIR=$(find ~/.local/share -path "*/claude-teacher-plugin/hooks" -type d 2>/dev/null | head -1)
-```
-
-Merge into `.claude/settings.json`:
+Write `.claude/claude-teacher.json`. This marker is what tells the plugin's hooks that this
+project is a learning project — without it they stay silent, so Claude behaves normally in
+every other project on the machine:
 
 ```json
 {
-  "outputStyle": "Explanatory",
-  "defaultView": "chat",
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "<PLUGIN_DIR>/session-start-load-db.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "<PLUGIN_DIR>/stop-save-progress.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "<PLUGIN_DIR>/post-code-review.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "<PLUGIN_DIR>/post-quiz-motivate.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ]
-  }
+  "learning_type": "[project / subject / exam-prep]",
+  "topic": "[topic from Step 3]",
+  "initialized": "[today's date]"
 }
 ```
 
-Replace `<PLUGIN_DIR>` with the actual resolved path from above. If the hooks directory cannot be found, skip hooks setup and inform the student they can add hooks manually later.
+Then merge `outputStyle` into `.claude/settings.json`, preserving any existing settings:
+
+```json
+{
+  "outputStyle": "Explanatory"
+}
+```
+
+Do NOT add hooks here. The plugin registers all five hooks itself through its own
+`hooks/hooks.json`, resolved against `${CLAUDE_PLUGIN_ROOT}`, so they survive plugin updates.
+
+**If this project was set up by an earlier version**, its `.claude/settings.json` contains a
+`hooks` block with absolute paths into the plugin cache. Those paths break on every plugin
+update. Remove that `hooks` block — the plugin now provides the hooks.
 
 ### Step 5: Create CLAUDE.md
 
@@ -213,7 +172,7 @@ You are the student's personal tutor. Your default behavior in this project is T
 
 ### Core Rules
 
-1. **NEVER write complete solutions.** Give skeletons with `???` to fill in. Ask leading questions before giving answers (Socratic method). When they're stuck, give ONE hint at a time.
+1. **NEVER write code.** The student writes all of it — no complete solutions, and no classes, functions, skeletons, or snippets either. Describe the structure in words, ask leading questions (Socratic method), and when they're stuck give ONE hint at a time.
 
 2. **ALWAYS research before explaining. NEVER hallucinate.** When teaching ANY topic, you MUST use WebSearch to find authoritative sources BEFORE explaining. Never rely solely on training data — the student trusts you as a teacher, so every factual claim must be backed by a real source. If you can't find a source, say so explicitly. This applies to explanations, quiz answers, challenge evaluations, and diagrams. Every new concept gets:
    - What it is (1-2 sentences)
@@ -251,14 +210,14 @@ You are the student's personal tutor. Your default behavior in this project is T
    - Project-specific explanations — save to project-local `docs/<topic-name>.md`
    Each doc should include the explanation, sources/links, date saved, and related topics.
 
-10. **Review code pedagogically.** When the student writes or shares code, don't just fix bugs. Ask questions first: "What happens if the input is empty?", "Why did you choose this data structure?". Guide them to find issues themselves.
+11. **Review code pedagogically.** When the student writes or shares code, don't just fix bugs. Ask questions first: "What happens if the input is empty?", "Why did you choose this data structure?". Guide them to find issues themselves.
 
 [ONLY FOR PROJECT TYPE:]
 ### Project-Specific Rules
-- Prefer simple, readable code over clever optimizations — clarity aids learning.
-- Add comments explaining non-obvious logic.
-- Suggest incremental steps rather than large implementations.
-- When reviewing student's code, ask "why did you choose this?" before suggesting changes.
+- Steer the student toward simple, readable code over clever optimizations — clarity aids learning.
+- Break the build into incremental steps they can each finish in one sitting.
+- Point at the part that needs a comment and ask what it should say; don't write it for them.
+- When reviewing their code, ask "why did you choose this?" before suggesting changes.
 
 [ONLY FOR TECHNOLOGY TYPE:]
 ### Technology Study Rules
@@ -276,9 +235,16 @@ You are the student's personal tutor. Your default behavior in this project is T
 
 ## Available Skills
 - `/quiz-me [topic]` — test understanding with adaptive difficulty
-- `/ascii [concept]` — ASCII diagrams for visual explanations
+- `/challenge [topic]` — get a mini-task on the current topic
+- `/flashcards [topic]` — generate Anki-style cards from studied topics
+- `/compare [A] vs [B]` — side-by-side concept comparison
+- `/research [task]` — build a study plan with real resources
+- `/roadmap [goal]` — visual learning path
+- `/ascii [concept]` — inline ASCII diagram (default)
+- `/excalidraw [concept]` — editable diagram for complex statics
+- `/demo [concept]` — animated interactive visualization
 - `/progress` — view knowledge dashboard
-- `/challenge` — get a mini-task on the current topic
+- `/motivate` — motivation boost
 - `/summary` — end-of-session recap with next steps
 - `/save-progress` — save current session progress to DB
 ```
@@ -299,7 +265,8 @@ Create `memory/knowledge_gaps.md` in Claude's project memory:
 ---
 name: knowledge_gaps
 description: Student knowledge tracking — weak areas, learned topics, solid foundations. Read at session start, update at session end.
-type: user
+metadata:
+  type: project
 ---
 
 ## Weak (review next session)
@@ -355,13 +322,14 @@ Append to `~/.local/share/claude-education/sessions/[today's date].jsonl`:
 ```
 Educational environment initialized!
 
-  Type ................. [project / technology / theory]
-  Topic ................ [topic]
-  .claude/settings.json  outputStyle → Explanatory
-  CLAUDE.md ............ teaching mode active
-  docs/ ................ ready for saving explanations
-  Global DB ............ ~/.local/share/claude-education/
-  Knowledge tracking ... initialized
+  Type ....................... [project / technology / theory]
+  Topic ...................... [topic]
+  .claude/claude-teacher.json  learning project — hooks active here
+  .claude/settings.json        outputStyle → Explanatory
+  CLAUDE.md .................. teaching mode active
+  docs/ ...................... ready for saving explanations
+  Global DB .................. ~/.local/share/claude-education/
+  Knowledge tracking ......... initialized
 
   Available commands:
     /quiz-me [topic]   Test your knowledge

@@ -42,13 +42,44 @@ skills/               (15 skills — keep README badge in sync!)
   roadmap/            Visual learning path diagram via Excalidraw
   reset-edu/          Wipe all education data
 hooks/                (5 hooks — keep README badge in sync!)
+  hooks.json                  Registers every hook against ${CLAUDE_PLUGIN_ROOT}
+  lib/teach-guard.sh          Shared guard + context emitter, sourced by all hooks
   session-start-load-db.sh    Loads student profile on session start
   inject-teach-context.sh     Injects teaching-mode rules into every user prompt
   stop-save-progress.sh       Auto-saves progress on session end
   post-code-review.sh         Triggers pedagogical questions after code edits
-  post-quiz-motivate.sh       Suggests encouragement after failed code runs
+  post-quiz-motivate.sh       Suggests encouragement after failed commands
 assets/
   banner.svg          README banner
+LICENSE
+```
+
+## Hook Rules
+
+Two invariants, both learned from bugs:
+
+1. **Every hook guards on `teach_is_learning_project`.** Hooks in `hooks.json` fire in every
+   project where the plugin is enabled, and the default install scope is `user`. Without the
+   guard, tutor mode leaks into unrelated repos.
+2. **Never write hook output with a bare `echo`.** Plain stdout on exit 0 reaches Claude only
+   for `UserPromptSubmit` and `SessionStart`; on every other event it goes to the debug log
+   and is silently discarded. Use `teach_emit_context <EventName> "<text>"`.
+
+A failing Bash command raises `PostToolUseFailure`, not `PostToolUse`, and that payload carries
+a top-level `error` string with no `tool_response` object.
+
+Test a hook by piping a payload into it:
+
+```bash
+echo '{"cwd":"/tmp/x","tool_input":{"file_path":"/tmp/x/main.py"}}' \
+  | CLAUDE_PROJECT_DIR=/tmp/x bash hooks/post-code-review.sh
+```
+
+Validate the whole plugin before committing:
+
+```bash
+claude plugin validate .          # marketplace manifest
+claude --plugin-dir . plugin details claude-teacher   # confirms hook + skill counts
 ```
 
 ## Making Changes

@@ -1,6 +1,7 @@
 ---
 name: challenge
 description: Use when the student wants a mini-task or practice exercise on the current topic — generates short focused challenges adapted to learning type (code, conceptual, or scenario-based). Results saved to global education DB.
+argument-hint: "[topic]"
 ---
 
 # Challenge — Mini-Tasks

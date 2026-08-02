@@ -1,6 +1,7 @@
 ---
 name: compare
 description: Use when the student wants a structured side-by-side comparison of two concepts — creates a researched comparison table, usage scenarios, misconceptions, and key takeaway adapted to the student's level
+argument-hint: "[concept A] vs [concept B]"
 ---
 
 # Compare — Side-by-Side Concept Comparisons
