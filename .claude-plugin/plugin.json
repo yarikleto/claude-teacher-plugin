@@ -3,7 +3,7 @@
   "name": "claude-teacher",
   "displayName": "Claude Teacher",
   "description": "The most attentive AI tutor — teaches any subject by guiding, tracks knowledge gaps, quizzes with spaced repetition, and adapts to your level",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "author": {
     "name": "Yaroslav",
     "url": "https://github.com/yarikleto"

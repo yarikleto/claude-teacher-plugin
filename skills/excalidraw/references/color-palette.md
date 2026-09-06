@@ -56,3 +56,14 @@ Evidence artifacts show real code, JSON, event names, or terminal output inside 
 3. **Limit palette per diagram** — use 3-4 roles max per diagram, not all 10
 4. **Evidence artifacts stand out** — their dark background should be visually distinct from all other elements
 5. **Consistent across diagrams** — "green always means success" across all diagrams the student sees
+
+## Learning Roadmap Status Colors
+
+Use these fills for roadmap topic nodes, with a visible status label so color is not the only signal:
+
+| Status | Fill |
+|---|---|
+| Solid | `#BFDBAD` |
+| Learned | `#BDD0E8` |
+| Weak | `#F5C4C4` |
+| New | `#E8E8E8` |

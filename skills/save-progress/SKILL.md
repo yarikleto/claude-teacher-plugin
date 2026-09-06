@@ -3,13 +3,16 @@ name: save-progress
 description: Use when the student wants to checkpoint their progress mid-session — flushes all current session state to the global education DB without ending the session
 ---
 
+
+Before accessing education data, read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md`. Resolve every `<education-db>` below using that contract. Current session ID: `${CLAUDE_SESSION_ID}`.
+
 # Save Progress
 
-Mid-session checkpoint that persists everything learned so far to the global education DB. Unlike `/summary` (which ends the session), this saves state and keeps going.
+Mid-session checkpoint that persists everything learned so far to the global education DB. Unlike `/claude-teacher:summary` (which ends the session), this saves state and keeps going.
 
 ## Invocation
 
-`/save-progress` — save everything from the current session so far
+`/claude-teacher:save-progress` — save everything from the current session so far
 
 ## Process
 
@@ -26,7 +29,7 @@ Review the conversation so far and identify:
 
 ### 2. Update Topic Files
 
-For each topic touched this session, create or update `~/.local/share/claude-education/topics/<slug>.json`:
+Read and merge each topic touched this session using the shared contract. This is an example for a newly taught topic, not a replacement for an existing record. Preserve assessment dates and intervals on repeated saves. Create or update `<education-db>/topics/<slug>.json`:
 
 ```json
 {
@@ -35,8 +38,8 @@ For each topic touched this session, create or update `~/.local/share/claude-edu
   "status": "weak|learned|solid",
   "depth": "surface|working|deep",
   "first_seen": "[date first encountered]",
-  "last_reviewed": "[today]",
-  "next_review": "[calculated]",
+  "last_reviewed": null,
+  "next_review": "[first review or existing date]",
   "review_interval_days": 1,
   "quiz_scores": [],
   "misconceptions": [],
@@ -48,18 +51,18 @@ For each topic touched this session, create or update `~/.local/share/claude-edu
 
 ### 3. Save Any Unsaved Quiz Records
 
-For each quiz taken this session that hasn't been saved yet, write to `~/.local/share/claude-education/quizzes/[date]_[topic].json`.
+For each quiz taken this session that hasn't been saved yet, write to `<education-db>/quizzes/[date]_[topic-slug]_[quiz-id].json`.
 
 ### 4. Update Dashboard
 
-Update `~/.local/share/claude-education/dashboard.json`:
+Update `<education-db>/dashboard.json`:
 - Refresh all topic statuses
 - Recalculate stats
 - Update `last_session` and `current_topic`
 
 ### 5. Append to Session Log
 
-Add entries to `~/.local/share/claude-education/sessions/[date].jsonl` for any events not yet logged:
+Add entries to `<education-db>/sessions/[date].jsonl` for any events not yet logged:
 
 ```jsonl
 {"time": "[now]", "event": "checkpoint", "topics_saved": ["..."], "note": "mid-session save"}
@@ -67,7 +70,7 @@ Add entries to `~/.local/share/claude-education/sessions/[date].jsonl` for any e
 
 ### 6. Update Student Profile
 
-If you learned anything new about the student (preferences, background, goals), update `~/.local/share/claude-education/student.json`.
+If you learned anything new about the student (preferences, background, goals), update `<education-db>/student.json`.
 
 ### 7. Update Project-Local Tracking
 

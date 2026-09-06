@@ -1,8 +1,12 @@
 ---
 name: roadmap
-description: "Use when the student wants a visual learning roadmap for a goal or topic area — reads current knowledge state, researches the standard learning path, and generates an interactive .excalidraw diagram with color-coded topic nodes, prerequisite arrows, and milestone markers. Visual companion to /research."
+description: "Use when the student wants a visual learning roadmap for a goal or topic area — reads current knowledge state, researches the standard learning path, and generates an interactive .excalidraw diagram with color-coded topic nodes, prerequisite arrows, and milestone markers. Visual companion to /claude-teacher:research."
 argument-hint: "[goal or topic area]"
 ---
+
+Requested topic/task: $ARGUMENTS
+
+Before accessing education data, read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md`. Resolve every `<education-db>` below using that contract. Current session ID: `${CLAUDE_SESSION_ID}`.
 
 # Roadmap — Visual Learning Path Generator
 
@@ -10,22 +14,22 @@ Generates an interactive `.excalidraw` diagram showing the full learning path fo
 
 ## Invocation
 
-`/roadmap <goal or topic area>`
+`/claude-teacher:roadmap <goal or topic area>`
 
 Examples:
-- `/roadmap backend development`
-- `/roadmap networking fundamentals`
-- `/roadmap prepare for AWS exam`
-- `/roadmap learn Rust from scratch`
+- `/claude-teacher:roadmap backend development`
+- `/claude-teacher:roadmap networking fundamentals`
+- `/claude-teacher:roadmap prepare for AWS exam`
+- `/claude-teacher:roadmap learn Rust from scratch`
 
 ## Process
 
 ### 1. Understand Current State
 
-1. Read `~/.local/share/claude-education/student.json` — get goals, level, known technologies, learning style, interests
-2. Read `~/.local/share/claude-education/dashboard.json` — get all tracked topics and statuses
-3. For topics relevant to the goal, read individual `~/.local/share/claude-education/topics/<slug>.json` files — get depth, prerequisites, misconceptions
-4. If the student has no profile yet, say: "Run `/init-edu` first so I can personalize your roadmap."
+1. Read `<education-db>/student.json` — get goals, level, known technologies, learning style, interests
+2. Read `<education-db>/dashboard.json` — get all tracked topics and statuses
+3. For topics relevant to the goal, read individual `<education-db>/topics/<slug>.json` files — get depth, prerequisites, misconceptions
+4. If the student has no profile yet, say: "Run `/claude-teacher:init-edu` first so I can personalize your roadmap."
 
 ### 2. Research the Learning Path
 
@@ -59,7 +63,7 @@ Also mark:
 
 ### 4. Generate the Excalidraw Diagram
 
-Invoke `/excalidraw` internally to generate the `.excalidraw` file. The diagram must follow these structural rules:
+Invoke `/claude-teacher:excalidraw` internally to generate the `.excalidraw` file. The diagram must follow these structural rules:
 
 #### Layout
 
@@ -130,7 +134,7 @@ Create a text version of the same roadmap:
 ## Phase 2: Core Skills
 *The main knowledge area for your goal*
 
-- [~] **Topic C** (learned) — [one-line description]
+- [ ] **Topic C** (learned) — [one-line description]
   - Prerequisites: Topic A, Topic B
   - Why: [relevance]
 - [ ] **Topic D** (new) — [one-line description]
@@ -165,7 +169,7 @@ Create a text version of the same roadmap:
 
 **Checklist symbols:**
 - `[x]` = solid (done)
-- `[~]` = learned or weak (in progress)
+- `[ ]` with a status label = learned or weak (in progress)
 - `[ ]` = new (not started)
 
 ### 6. Save Files
@@ -174,22 +178,24 @@ Save to **four locations**:
 
 1. **Project-local diagram:** `docs/roadmap-<goal-slug>.excalidraw`
 2. **Project-local markdown:** `docs/roadmap-<goal-slug>.md`
-3. **Global diagram:** `~/.local/share/claude-education/docs/roadmap-<goal-slug>.excalidraw`
-4. **Global markdown:** `~/.local/share/claude-education/docs/roadmap-<goal-slug>.md`
+3. **Global diagram:** `<education-db>/docs/roadmap-<goal-slug>.excalidraw`
+4. **Global markdown:** `<education-db>/docs/roadmap-<goal-slug>.md`
 
 Tell the student the file paths and how to open the `.excalidraw` file (VS Code extension or excalidraw.com).
 
 ### 7. Update the Education DB
 
 **For each NEW topic in the roadmap not already in the DB:**
-- Create `~/.local/share/claude-education/topics/<slug>.json` with:
+- Create `<education-db>/topics/<slug>.json` with:
   - `status: "new"`
   - `depth: "surface"`
+  - `first_seen`, `last_reviewed`, `next_review`: `null` (planned, untaught)
+  - `review_interval_days: 1`
   - `prerequisites` filled from the roadmap structure
   - `related_topics` filled from adjacent nodes
 - Update `dashboard.json` to include the new topics
 
-**Append to session log** `~/.local/share/claude-education/sessions/[date].jsonl`:
+**Append to session log** `<education-db>/sessions/[date].jsonl`:
 ```jsonl
 {"time": "[now]", "event": "roadmap", "goal": "[goal description]", "diagram_file": "docs/roadmap-<goal-slug>.excalidraw", "markdown_file": "docs/roadmap-<goal-slug>.md", "topics_total": N, "topics_known": X, "topics_new": Y, "milestones": ["milestone1", "milestone2"]}
 ```
@@ -222,10 +228,10 @@ Tell the student the file paths and how to open the `.excalidraw` file (VS Code 
 
 ## Integration with Other Skills
 
-- **`/excalidraw`** — roadmap uses `/excalidraw` to generate the diagram. Follow all excalidraw reference files and quality rules.
-- **`/research`** — text-based study plan companion. `/roadmap` is the visual overview, `/research` provides detailed resources per topic. Suggest: "Want detailed resources for any of these topics? Run `/research [topic]`."
-- **`/progress`** — after generating a roadmap, suggest `/progress` to see the detailed dashboard. As the student progresses, re-running `/roadmap` shows updated colors.
-- **`/quiz-me`** — suggest quizzing on learned/weak topics shown in the roadmap to promote them to solid.
-- **`/challenge`** — suggest challenges at milestone points to verify readiness before moving on.
-- **`/summary`** — session summary can reference roadmap progress.
-- Re-running `/roadmap` with the same goal produces an **updated** diagram reflecting new knowledge state — encourage the student to re-run periodically to see visual progress.
+- **`/claude-teacher:excalidraw`** — roadmap uses `/claude-teacher:excalidraw` to generate the diagram. Follow all excalidraw reference files and quality rules.
+- **`/claude-teacher:research`** — text-based study plan companion. `/claude-teacher:roadmap` is the visual overview, `/claude-teacher:research` provides detailed resources per topic. Suggest: "Want detailed resources for any of these topics? Run `/claude-teacher:research [topic]`."
+- **`/claude-teacher:progress`** — after generating a roadmap, suggest `/claude-teacher:progress` to see the detailed dashboard. As the student progresses, re-running `/claude-teacher:roadmap` shows updated colors.
+- **`/claude-teacher:quiz-me`** — suggest quizzing on learned/weak topics shown in the roadmap to promote them to solid.
+- **`/claude-teacher:challenge`** — suggest challenges at milestone points to verify readiness before moving on.
+- **`/claude-teacher:summary`** — session summary can reference roadmap progress.
+- Re-running `/claude-teacher:roadmap` with the same goal produces an **updated** diagram reflecting new knowledge state — encourage the student to re-run periodically to see visual progress.

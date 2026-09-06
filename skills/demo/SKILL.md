@@ -1,8 +1,12 @@
 ---
 name: demo
-description: "Use when the concept needs ANIMATION or INTERACTIVITY to be understood — step-by-step protocol flows, sorting algorithm traces, state machine transitions, network packet journeys, or anything where static images fall short. Generates a single .html file with Canvas/SVG + JavaScript that opens in any browser; styling and the UI layer load from a CDN. For static diagrams use /ascii (simple) or /excalidraw (complex)."
+description: "Use when the concept needs ANIMATION or INTERACTIVITY to be understood — step-by-step protocol flows, sorting algorithm traces, state machine transitions, network packet journeys, or anything where static images fall short. Generates a single .html file with Canvas/SVG + JavaScript that opens in any browser; styling and the UI layer load from a CDN. For static diagrams use /claude-teacher:ascii (simple) or /claude-teacher:excalidraw (complex)."
 argument-hint: "[concept]"
 ---
+
+Requested topic/task: $ARGUMENTS
+
+Before accessing education data, read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md`. Resolve every `<education-db>` below using that contract. Current session ID: `${CLAUDE_SESSION_ID}`.
 
 # Demo — Interactive Animated Diagrams
 
@@ -10,11 +14,11 @@ Generate `.html` files with animated, interactive visualizations. Uses a **templ
 
 ## Invocation
 
-`/demo <concept description>`
+`/claude-teacher:demo <concept description>`
 
 ## When to Use This
 
-| `/demo` | `/excalidraw` | `/ascii` |
+| `/claude-teacher:demo` | `/claude-teacher:excalidraw` | `/claude-teacher:ascii` |
 |-----------|---------------|----------|
 | Needs animation (packets moving, sort steps) | Complex but static (architecture, data structures) | Quick inline terminal visual |
 | Step-by-step walkthrough with play/pause | Student wants to edit/rearrange the diagram | Simple sequence or flowchart |
@@ -22,7 +26,7 @@ Generate `.html` files with animated, interactive visualizations. Uses a **templ
 
 ## Template Architecture
 
-The template at `skills/demo/template.html` ships with:
+The template at `${CLAUDE_SKILL_DIR}/template.html` ships with:
 
 | Layer | Technology | What it provides |
 |-------|-----------|-----------------|
@@ -36,15 +40,17 @@ The template at `skills/demo/template.html` ships with:
 ## Process
 
 1. **Research the concept** using WebSearch — verify accuracy
-2. **Read the template** at `skills/demo/template.html`
+2. **Read the template** at `${CLAUDE_SKILL_DIR}/template.html`
 3. **Copy the template** to `docs/<concept-name>.html`
 4. **Replace placeholders:**
-   - `__TITLE__` → concept name (appears in 3 places: `<title>`, `<h1>`, and Preact `html`)
-   - `__SUBTITLE__` → one-line description (appears in 2 places)
+   - `__TITLE__` → concept name (document title and visible heading)
+   - `__SUBTITLE__` → one-line description (visible subtitle)
    - `__SOURCE_HTML__` → source link, e.g. `Source: <a href="https://...">RFC 793</a>`
    - `__CUSTOM_CSS__` → any concept-specific CSS (usually empty — use Bootstrap utilities first)
+   Escape replacements for their actual context: HTML text/attributes and JavaScript template literals require different escaping. Never paste raw topic text into JavaScript; serialize data and escape `<` as `\u003c` inside scripts. Only emit verified HTTP(S) source links.
 5. **Replace the content section** (`__CONTENT_START__` to `__CONTENT_END__`) with your STEPS array and optional drawBackground/drawOverlay functions
-6. **Save** and tell the student how to open it
+6. **Validate** the generated JavaScript and open the result in a browser when available. Check play/pause, navigation, theme, responsive sizing, and console errors. If browser verification is unavailable, disclose it.
+7. **Save** and tell the student how to open it
 
 ## What You Write: The STEPS Array
 
@@ -197,7 +203,7 @@ The template loads these from CDN — you can use them for custom UI if needed:
 - **Bootstrap Icons** — `<i class="bi bi-*"></i>` icon font
 - **Preact + HTM** — reactive components (the engine uses these, you can too for custom overlays)
 
-For extra HTML sections (tables, accordions, tabbed views alongside the canvas), you can add Bootstrap-styled elements in the `__CUSTOM_CSS__` area or extend the Preact App component.
+For extra HTML sections (tables, accordions, tabbed views alongside the canvas), extend the Preact App component. `__CUSTOM_CSS__` is inside a style block and accepts CSS only.
 
 ## Layout Guidelines
 
@@ -268,17 +274,17 @@ After creating the visualization:
 
 1. **Save `.html` file** to `docs/<concept-name>.html`
 2. **Save/update explanation** in `docs/<concept-name>.md` — mention the interactive visualization
-3. **Save to global docs** at `~/.local/share/claude-education/docs/<concept-name>.html` (for general concepts)
-4. **Append to session log** `~/.local/share/claude-education/sessions/[date].jsonl`:
+3. **Save to global docs** at `<education-db>/docs/<concept-name>.html` (for general concepts)
+4. **Append to session log** `<education-db>/sessions/[date].jsonl`:
    ```jsonl
    {"time": "[now]", "event": "demo", "topic": "[concept-slug]", "file": "docs/[concept-name].html", "saved_to": "global|project|both"}
    ```
-5. If the concept corresponds to a tracked topic, update `last_reviewed` in its topic file
+5. If the concept corresponds to a tracked topic, update only `last_seen`; preserve its assessment dates and review interval
 
 ## Integration with Other Skills
 
-- **`/ascii`** — quick terminal diagrams (simplest tier)
-- **`/excalidraw`** — static but editable diagrams (middle tier)
-- **`/demo`** — animated interactive visualizations (richest tier)
-- **`/quiz-me`** — after watching a demo animation, quiz the student on the steps
-- **`/challenge`** — "predict what happens at step 5" before revealing it
+- **`/claude-teacher:ascii`** — quick terminal diagrams (simplest tier)
+- **`/claude-teacher:excalidraw`** — static but editable diagrams (middle tier)
+- **`/claude-teacher:demo`** — animated interactive visualizations (richest tier)
+- **`/claude-teacher:quiz-me`** — after watching a demo animation, quiz the student on the steps
+- **`/claude-teacher:challenge`** — "predict what happens at step 5" before revealing it

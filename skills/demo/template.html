@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -124,6 +124,7 @@
 
     @media (max-width: 576px) {
       .btn-label { display: none; }
+      .demo-header-actions { position: static !important; justify-content: center; margin: 0.5rem 0 0 !important; }
     }
 
     /* __CUSTOM_CSS__ */
@@ -131,7 +132,10 @@
 </head>
 <body class="d-flex justify-content-center p-3">
 
-  <div id="app" class="d-flex flex-column gap-2 w-100" style="max-width: 960px;"></div>
+  <div id="app" class="d-flex flex-column gap-2 w-100" style="max-width: 960px;">
+    <p role="status">Loading the interactive demo…</p>
+  </div>
+  <noscript>This demo requires JavaScript. Read the companion Markdown explanation for the same concept.</noscript>
 
   <!-- CDN: Preact + HTM (UMD — works with file:// protocol) -->
   <script src="https://cdn.jsdelivr.net/npm/preact@10.25.4/dist/preact.umd.js"></script>
@@ -139,9 +143,24 @@
   <script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
 
   <script>
+    (() => {
+    if (!window.preact || !window.preactHooks || !window.htm) {
+      document.getElementById('app').textContent = 'The demo libraries could not load. Check your network connection and reload, or read the companion Markdown explanation.';
+      return;
+    }
     const { h, render } = preact;
     const { useState, useEffect, useRef, useCallback } = preactHooks;
     const html = htm.bind(h);
+    const storageKey = 'claude-teacher:demo:' + window.location.pathname;
+    function readSavedStep() {
+      try {
+        const saved = Number(localStorage.getItem(storageKey));
+        return Number.isInteger(saved) && saved >= 0 && saved < STEPS.length ? saved : 0;
+      } catch { return 0; }
+    }
+    function saveStep(step) {
+      try { localStorage.setItem(storageKey, String(step)); } catch { /* Storage may be unavailable for local files. */ }
+    }
 
     /* ═══════════════════════════════════════════════
        DRAWING LIBRARY
@@ -221,13 +240,15 @@
 
     /** Label inside a pill/badge shape */
     function drawPill(ctx, text, x, y, opts = {}) {
-      const { fill = color('--primary'), textColor = color('--text'), size = 12, px = 12, py = 4 } = opts;
+      const { fill = color('--primary'), textColor = color('--text'), size = 12, px = 12, py = 4, opacity = 1 } = opts;
+      ctx.save();
       ctx.font = `500 ${size}px 'Inter', system-ui, sans-serif`;
       const tw = ctx.measureText(text).width;
       const pw = tw + px * 2;
       const ph = size + py * 2;
-      drawBox(ctx, x - pw / 2, y - ph / 2, pw, ph, { fill, radius: ph / 2 });
-      drawText(ctx, text, x, y, { size, weight: '500', fillColor: textColor });
+      drawBox(ctx, x - pw / 2, y - ph / 2, pw, ph, { fill, radius: ph / 2, opacity });
+      drawText(ctx, text, x, y, { size, weight: '500', fillColor: textColor, opacity });
+      ctx.restore();
     }
 
     // ── Lines & Arrows ────────────────────────────
@@ -421,6 +442,10 @@
 
     // __CONTENT_END__
 
+    // Keep named content callbacks compatible with the original template.
+    if (typeof drawBackground === 'function') window.drawBackground = drawBackground;
+    if (typeof drawOverlay === 'function') window.drawOverlay = drawOverlay;
+
 
     /* ═══════════════════════════════════════════════
        APP COMPONENT — DO NOT MODIFY
@@ -432,17 +457,8 @@
       const canvasRef = useRef(null);
       const wrapRef = useRef(null);
 
-      // Restore step from localStorage, or start at 0
-      const initialStep = (() => {
-        const saved = localStorage.getItem('demo-step');
-        if (saved !== null) {
-          const n = parseInt(saved, 10);
-          if (!isNaN(n) && n >= 0 && n < STEPS.length) return n;
-        }
-        return 0;
-      })();
-
-      const [step, setStep] = useState(initialStep);
+      const progressRef = useRef(null);
+      const [step, setStep] = useState(readSavedStep);
       const [playing, setPlaying] = useState(false);
       const [speed, setSpeed] = useState(1);
 
@@ -459,7 +475,7 @@
 
       // Persist step to localStorage
       useEffect(() => {
-        localStorage.setItem('demo-step', step);
+        saveStep(step);
       }, [step]);
 
       // Theme toggle
@@ -475,9 +491,9 @@
 
       // Fullscreen toggle
       const toggleFullscreen = useCallback(() => {
-        if (!document.fullscreenElement) {
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
           document.documentElement.requestFullscreen().catch(() => {});
-        } else {
+        } else if (document.exitFullscreen) {
           document.exitFullscreen().catch(() => {});
         }
       }, []);
@@ -513,6 +529,11 @@
       const renderFrame = useCallback(() => {
         const cvs = canvasRef.current;
         if (!cvs) return;
+        if (progressRef.current) {
+          const pct = STEPS.length ? ((step + animRef.current.progress) / STEPS.length) * 100 : 0;
+          progressRef.current.style.width = pct + "%";
+          progressRef.current.setAttribute("aria-valuenow", String(Math.round(pct)));
+        }
         const ctx = cvs.getContext('2d');
         const { W, H } = dimsRef.current;
         ctx.clearRect(0, 0, W, H);
@@ -540,18 +561,19 @@
         if (typeof window.drawOverlay === 'function') {
           window.drawOverlay(ctx, W, H, currentStep, animRef.current.progress);
         }
-      }, [step]);
+      }, [step, dark]);
 
       // Animation loop
       useEffect(() => {
-        setupCanvas();
-        window.addEventListener('resize', setupCanvas);
+        const redraw = () => { setupCanvas(); renderFrame(); };
+        redraw();
+        window.addEventListener('resize', redraw);
 
         let rafId;
         const tick = (ts) => {
           const a = animRef.current;
           if (a.lastTs === null) a.lastTs = ts;
-          const dt = (ts - a.lastTs) / 1000;
+          const dt = Math.min(0.1, Math.max(0, (ts - a.lastTs) / 1000));
           a.lastTs = ts;
 
           if (playing) {
@@ -572,13 +594,13 @@
           }
 
           renderFrame();
-          rafId = requestAnimationFrame(tick);
+          if (playing) rafId = requestAnimationFrame(tick);
         };
 
-        rafId = requestAnimationFrame(tick);
+        if (playing) rafId = requestAnimationFrame(tick);
         return () => {
           cancelAnimationFrame(rafId);
-          window.removeEventListener('resize', setupCanvas);
+          window.removeEventListener('resize', redraw);
         };
       }, [step, playing, speed, setupCanvas, renderFrame]);
 
@@ -612,7 +634,8 @@
         setPlaying(false);
         animRef.current = { progress: 0, pauseTimer: 0, lastTs: null };
         setStep(0);
-      }, []);
+        renderFrame();
+      }, [renderFrame]);
 
       // Jump to arbitrary step (for step scrubber)
       const goToStep = useCallback((target) => {
@@ -630,6 +653,8 @@
       // Keyboard
       useEffect(() => {
         const onKey = (e) => {
+          if (e.defaultPrevented || e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+          if (e.target?.isContentEditable || e.target?.closest?.('input, textarea, select, button, a, [contenteditable]')) return;
           if (e.key === 'ArrowRight') { goNext(); e.preventDefault(); }
           if (e.key === 'ArrowLeft') { goPrev(); e.preventDefault(); }
           if (e.key === ' ') { togglePlay(); e.preventDefault(); }
@@ -641,7 +666,6 @@
       }, [goNext, goPrev, togglePlay, resetAll, toggleFullscreen]);
 
       const current = STEPS[step] || {};
-      const pct = ((step + animRef.current.progress) / STEPS.length) * 100;
       const btnClass = dark ? 'btn-outline-light' : 'btn-outline-dark';
       const speeds = [
         { val: 2, label: 'Slow', icon: 'bi-chevron-right' },
@@ -653,14 +677,14 @@
         <div class="text-center py-2 position-relative">
           <h1 class="gradient-title fw-bold fs-3 mb-1">__TITLE__</h1>
           <p class="text-secondary small mb-0">__SUBTITLE__</p>
-          <div class="position-absolute top-0 end-0 mt-1 me-1 d-flex gap-1">
+          <div class="demo-header-actions position-absolute top-0 end-0 mt-1 me-1 d-flex gap-1">
             <button class="btn btn-sm border-0"
-                    onClick=${toggleFullscreen} title=${isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                    onClick=${toggleFullscreen} aria-label=${isFullscreen ? 'Exit fullscreen' : 'Fullscreen'} title=${isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
                     style="font-size: 1.2rem; opacity: 0.6;">
               <i class="bi ${isFullscreen ? 'bi-fullscreen-exit' : 'bi-fullscreen'}"></i>
             </button>
             <button class="btn btn-sm border-0"
-                    onClick=${toggleTheme} title=${dark ? 'Switch to light mode' : 'Switch to dark mode'}
+                    onClick=${toggleTheme} aria-label=${dark ? 'Switch to light mode' : 'Switch to dark mode'} title=${dark ? 'Switch to light mode' : 'Switch to dark mode'}
                     style="font-size: 1.2rem; opacity: 0.6;">
               <i class="bi ${dark ? 'bi-sun' : 'bi-moon-fill'}"></i>
             </button>
@@ -668,17 +692,19 @@
         </div>
 
         <div class="canvas-wrap rounded-4 overflow-hidden" ref=${wrapRef}>
-          <canvas ref=${canvasRef}></canvas>
+          <canvas ref=${canvasRef} role="img" aria-label=${current.title + ": " + current.explain}></canvas>
         </div>
 
         <div class="progress progress-accent" style="height: 3px;">
-          <div class="progress-bar" style=${{ width: pct + '%', transition: 'width 0.25s ease' }}></div>
+          <div class="progress-bar" ref=${progressRef} role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 0%;"></div>
         </div>
 
         <div class="d-flex justify-content-center align-items-center gap-2 py-1 flex-wrap">
           ${STEPS.map((_, i) => html`
             <button class="step-dot ${i < step ? 'completed' : ''} ${i === step ? 'active' : ''}"
                     onClick=${() => goToStep(i)}
+                    aria-label=${'Step ' + (i + 1) + ': ' + (STEPS[i].title || '')}
+                    aria-current=${i === step ? 'step' : undefined}
                     title=${'Step ' + (i + 1) + ': ' + (STEPS[i].title || '')}></button>
           `)}
         </div>
@@ -686,19 +712,19 @@
         <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 p-3 rounded-4"
              style="background: var(--surface); border: 1px solid rgba(255,255,255,0.06);">
           <button class="btn ${btnClass} btn-sm d-inline-flex align-items-center gap-1"
-                  onClick=${goPrev} disabled=${step === 0} title="Previous (←)">
+                  onClick=${goPrev} disabled=${step === 0} aria-label="Previous step" title="Previous (←)">
             <i class="bi bi-skip-backward-fill"></i><span class="btn-label">Prev</span>
           </button>
           <button class="btn ${btnClass} btn-sm btn-glow d-inline-flex align-items-center gap-1 ${playing ? 'active' : ''}"
-                  onClick=${togglePlay} title="Play / Pause (Space)">
+                  onClick=${togglePlay} aria-label=${playing ? 'Pause' : 'Play'} aria-pressed=${playing} title="Play / Pause (Space)">
             <i class="bi ${playing ? 'bi-pause-fill' : 'bi-play-fill'}"></i>
             <span class="btn-label">${playing ? 'Pause' : 'Play'}</span>
           </button>
           <button class="btn ${btnClass} btn-sm d-inline-flex align-items-center gap-1"
-                  onClick=${goNext} disabled=${step === STEPS.length - 1} title="Next (→)">
+                  onClick=${goNext} disabled=${step === STEPS.length - 1} aria-label="Next step" title="Next (→)">
             <i class="bi bi-skip-forward-fill"></i><span class="btn-label">Next</span>
           </button>
-          <button class="btn ${btnClass} btn-sm" onClick=${resetAll} title="Reset (R)">
+          <button class="btn ${btnClass} btn-sm" onClick=${resetAll} aria-label="Reset" title="Reset (R)">
             <i class="bi bi-arrow-counterclockwise"></i>
           </button>
 
@@ -712,7 +738,7 @@
             ${speeds.map(s => html`
               <button class="btn btn-sm btn-speed border-0 ${speed === s.val ? 'active' : ''}"
                 style="background: transparent; color: var(--text-muted); font-size: 0.78rem;"
-                onClick=${() => setSpeed(s.val)} title=${s.label}>
+                onClick=${() => setSpeed(s.val)} aria-label=${s.label + " speed"} aria-pressed=${speed === s.val} title=${s.label}>
                 <i class="bi ${s.icon}"></i>
               </button>
             `)}
@@ -741,7 +767,10 @@
       `;
     }
 
-    render(html`<${App} />`, document.getElementById('app'));
+    const appRoot = document.getElementById('app');
+    appRoot.textContent = '';
+    render(html`<${App} />`, appRoot);
+    })();
   </script>
 </body>
 </html>

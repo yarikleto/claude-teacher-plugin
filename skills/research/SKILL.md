@@ -4,25 +4,29 @@ description: "Use when the student has a task, project, or goal and needs a stru
 argument-hint: "[task or project]"
 ---
 
+Requested topic/task: $ARGUMENTS
+
+Before accessing education data, read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md`. Resolve every `<education-db>` below using that contract. Current session ID: `${CLAUDE_SESSION_ID}`.
+
 # Research — Study Plan Generator
 
 Researches what the student needs to learn to successfully complete a task or project, then saves a structured checklist with resources to a markdown file.
 
 ## Invocation
 
-`/research <task or project description>`
+`/claude-teacher:research <task or project description>`
 
 Examples:
-- `/research build an FTP server in C`
-- `/research prepare for AWS Solutions Architect exam`
-- `/research create a REST API with authentication`
-- `/research understand how Docker networking works`
+- `/claude-teacher:research build an FTP server in C`
+- `/claude-teacher:research prepare for AWS Solutions Architect exam`
+- `/claude-teacher:research create a REST API with authentication`
+- `/claude-teacher:research understand how Docker networking works`
 
 ## Process
 
 ### 1. Understand the Goal
 
-Read `~/.local/share/claude-education/student.json` and `dashboard.json` to understand:
+Read `<education-db>/student.json` and `dashboard.json` to understand:
 - What the student already knows (skip those topics)
 - Their level and background (calibrate depth)
 - Their goals and deadlines (prioritize accordingly)
@@ -57,11 +61,11 @@ Break the task into skills/knowledge areas needed. For each area, determine:
 - Is it a **core skill** (directly needed for the task)?
 - Is it **nice-to-have** (improves quality but not required)?
 
-Cross-reference with `dashboard.json` — if the student already has a topic at `solid` or `working` depth, mark it as done in the plan.
+Cross-reference with `dashboard.json` — if the student has demonstrated `status: solid`, mark it known. `depth: working` alone still needs review.
 
-Cross-reference with the **project scan** — if the codebase already has a working implementation of something (e.g., TCP socket setup is done), mark that topic as done and note "already implemented in your project."
+Cross-reference with the **project scan** — if the codebase already has a working implementation of something (e.g., TCP socket setup is done), note "already implemented in your project" and include a self-check. Implementation alone does not establish the student's understanding.
 
-### 3. Research Resources
+### 4. Research Resources
 
 Use **WebSearch** to find real, authoritative resources for each topic. For every topic, find **2-4 resources** from different categories:
 
@@ -71,7 +75,7 @@ Use **WebSearch** to find real, authoritative resources for each topic. For ever
 | Tutorial/guide | DigitalOcean, freeCodeCamp, Real Python | For hands-on learners |
 | Article/deep-dive | Blog posts, conference talks, papers | For deeper understanding |
 | Video | YouTube tutorials, course lectures | If student prefers video |
-| Interactive | Exercism, LeetCode, Katacoda | For practice-oriented students |
+| Interactive | Exercism, LeetCode, official interactive tutorials | For practice-oriented students |
 
 **Rules:**
 - Every link MUST be real and verified — never hallucinate URLs
@@ -86,7 +90,7 @@ Use **WebSearch** to find real, authoritative resources for each topic. For ever
 - Include estimated reading/watching time when possible
 - Note difficulty level (beginner/intermediate/advanced) for each resource
 
-### 4. Build the Study Plan
+### 5. Build the Study Plan
 
 Structure the plan as a markdown checklist with clear phases:
 
@@ -158,20 +162,22 @@ After completing this plan, you should be ready to:
 - Start building: [first concrete step of the actual task]
 ```
 
-### 5. Save the Plan
+### 6. Save the Plan
 
 Save to **two locations**:
 - Project-local: `docs/study-plan-<slug>.md`
-- Global: `~/.local/share/claude-education/docs/study-plan-<slug>.md`
+- Global: `<education-db>/docs/study-plan-<slug>.md`
 
 Tell the student the file path so they can open it and start checking off items.
 
-### 6. Update the Education DB
+### 7. Update the Education DB
 
 For each NEW topic in the plan that isn't already in the DB:
-- Create `~/.local/share/claude-education/topics/<slug>.json` with:
+- Create `<education-db>/topics/<slug>.json` with:
   - `status: "new"` (not yet studied)
-  - `depth: "surface"` 
+  - `depth: "surface"`
+  - `first_seen`, `last_reviewed`, `next_review`: `null` (planned, untaught)
+  - `review_interval_days: 1`
   - `prerequisites` filled in based on the plan structure
   - `related_topics` filled in
 - Update `dashboard.json` to include the new topics
@@ -189,7 +195,7 @@ Append to session log:
 - **Advanced**: Minimal prerequisites, focus on specifics and edge cases, include RFCs/papers
 
 **Based on learning style:**
-- **Visual learner**: Prioritize video resources, suggest `/excalidraw` or `/demo` for complex topics
+- **Visual learner**: Prioritize video resources, suggest `/claude-teacher:excalidraw` or `/claude-teacher:demo` for complex topics
 - **Hands-on learner**: More "Build:" and "Practice:" items, fewer "Read:" items
 - **Reader**: More articles and docs, fewer videos
 
@@ -208,9 +214,9 @@ Append to session log:
 
 ## Integration with Other Skills
 
-- After the student studies a topic from the plan → suggest `/quiz-me [topic]` to verify
-- After a phase is complete → suggest `/progress` to see updated dashboard
-- For visual topics in the plan → suggest `/ascii`, `/excalidraw`, or `/demo`
-- For hands-on topics → suggest `/challenge`
-- At session end → `/summary` captures what was studied from the plan
+- After the student studies a topic from the plan → suggest `/claude-teacher:quiz-me [topic]` to verify
+- After a phase is complete → suggest `/claude-teacher:progress` to see updated dashboard
+- For visual topics in the plan → suggest `/claude-teacher:ascii`, `/claude-teacher:excalidraw`, or `/claude-teacher:demo`
+- For hands-on topics → suggest `/claude-teacher:challenge`
+- At session end → `/claude-teacher:summary` captures what was studied from the plan
 - The plan file itself becomes a persistent reference the student returns to across sessions

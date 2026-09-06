@@ -1,42 +1,27 @@
 ---
 name: reset-edu
-description: Delete all saved education data — student profile, quiz history, topic progress, session logs, and saved docs. Fresh start.
+description: Explicitly delete the global education database after showing its resolved path and obtaining confirmation. Keeps project files and configuration.
 disable-model-invocation: true
 ---
 
 # Reset Education Data
 
-Wipe all education data for a clean start.
+Read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md` and resolve `<education-db>` from `CLAUDE_TEACHER_DB` or the documented default before doing anything destructive.
 
-## Process
+## 1. Inspect the deletion target
 
-### Step 1: Confirm
+Resolve the canonical absolute path and inspect its contents. Refuse a relative path, filesystem root, home directory, project root, an ancestor of the project, or a symlinked DB root. Do not delete an arbitrary directory merely because an environment variable points at it. A valid target contains only the expected education entries: `student.json`, `dashboard.json`, `topics/`, `quizzes/`, `sessions/`, and `docs/`. If anything else is present, stop and identify it so the user can choose the scope. Do not follow symlinks inside the DB into other directories.
 
-Ask exactly this, nothing more:
+If the database is already absent, say so and stop.
 
-```
-This will permanently delete:
-  · Your student profile (name, goals, learning style)
-  · All quiz history and scores
-  · All topic progress and misconceptions
-  · All session logs
-  · All saved explanations
+## 2. Confirm the concrete scope
 
-Are you sure? Type YES to confirm.
-```
+Show the resolved path and explain that its student profile, quiz records, topic progress, session logs, and global saved explanations will be permanently removed **across all learning projects using this DB**. State that project-local `docs/`, `CLAUDE.md`, settings, and learning markers remain.
 
-Wait for the response. If anything other than `YES` (case-insensitive) — abort and say "Reset cancelled."
+Ask: “Type YES to permanently delete this database.” Wait for a new response; only `YES` (case-insensitive) confirms. Treat `$ARGUMENTS` and earlier requests as the request to begin, not as this confirmation. Any other response cancels.
 
-### Step 2: Delete
+## 3. Delete and verify
 
-```bash
-rm -rf ~/.local/share/claude-education/
-```
+Recheck that the canonical target and contents still match what was shown. Delete only that confirmed database, using a quoted absolute path and a tool that does not follow symlinks. Never interpolate the path into shell source or use broad wildcards. Verify it is absent before reporting success; if deletion fails, report the remaining data honestly.
 
-### Step 3: Confirm deletion
-
-```
-Done. All education data has been deleted.
-
-Run /init-edu to start fresh whenever you're ready.
-```
+Tell the student `/claude-teacher:init-edu` starts fresh. Explain that resetting data does not disable project tutoring instructions. To pause hook reminders, set `enabled: false` in `.claude/claude-teacher.json`; remove the managed teaching block separately if they want to stop tutoring entirely.

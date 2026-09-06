@@ -4,23 +4,27 @@ description: Use when the student wants a mini-task or practice exercise on the 
 argument-hint: "[topic]"
 ---
 
+Requested topic/task: $ARGUMENTS
+
+Before accessing education data, read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md`. Resolve every `<education-db>` below using that contract. Current session ID: `${CLAUDE_SESSION_ID}`.
+
 # Challenge — Mini-Tasks
 
 Generates a short, focused exercise on the current topic. Adapts to the learning type. Results update the global education DB.
 
 ## Invocation
 
-`/challenge` — picks topic from current context, weak areas, or topics at `surface` depth that need to reach `working`
-`/challenge [topic]` — specific topic
+`/claude-teacher:challenge` — picks topic from current context, weak areas, or topics at `surface` depth that need to reach `working`
+`/claude-teacher:challenge [topic]` — specific topic
 
 ## Process
 
-1. Read `~/.local/share/claude-education/dashboard.json` — check topic statuses
-2. Read `~/.local/share/claude-education/student.json` — adapt to learning style and level
-3. If a topic was given, read `~/.local/share/claude-education/topics/<topic>.json` — check depth, misconceptions
+1. Read `<education-db>/dashboard.json` — check topic statuses
+2. Read `<education-db>/student.json` — adapt to learning style and level
+3. If a topic was given, read `<education-db>/topics/<topic>.json` — check depth, misconceptions
 4. If no topic given, pick using priority: topics at `surface` depth (need hands-on to reach `working`) → `weak` topics → `learned` topics
 5. **NEVER generate challenges on topics not in the DB** — the student hasn't learned them yet. If no covered topics exist: "Nothing to challenge on yet — let's learn something first!"
-6. Check CLAUDE.md for learning type (project / technology / theory)
+6. Read `.claude/claude-teacher.json` for learning type (`project`, `subject`, `exam-prep`, or `mixed`); use CLAUDE.md only as a legacy fallback
 7. If topic has unresolved misconceptions, design the challenge to expose/address them
 8. Generate ONE challenge appropriate to the type
 9. Wait for the student's answer
@@ -41,7 +45,7 @@ CHALLENGE: Write a function that...
   [Expected input/output if applicable]
 ```
 
-### Technology (scenario challenges)
+### Subject / mixed (scenario challenges)
 ```
 CHALLENGE: You are designing...
 
@@ -53,7 +57,7 @@ CHALLENGE: You are designing...
   [Question: what would you do / choose / configure?]
 ```
 
-### Theory (conceptual challenges)
+### Exam prep (conceptual or timed challenges)
 ```
 CHALLENGE: Explain / prove / trace...
 
@@ -66,19 +70,19 @@ CHALLENGE: Explain / prove / trace...
 
 ## Multiple-Choice Challenges — Use `AskUserQuestion`
 
-When a challenge naturally fits a multiple-choice format (scenario-based "what would you do?" or theory-based "which approach is correct?"), use the `AskUserQuestion` tool so the student can select with arrow keys. This is MANDATORY for any challenge that presents discrete options — never print options as plain text.
+When a challenge naturally fits a multiple-choice format (scenario-based "what would you do?" or theory-based "which approach is correct?"), use the `AskUserQuestion` tool so the student can select with arrow keys. If the tool is unavailable, use plain-text options and wait for an answer.
 
 ```
 AskUserQuestion({
   questions: [{
     question: "CHALLENGE (medium): A client reports intermittent timeouts connecting to your service behind a load balancer. Which investigation step would you take FIRST?",
-    header: "Scenario Challenge",
+    header: "Scenario",
     multiSelect: false,
     options: [
-      { label: "a) Restart the load balancer", description: "Quick fix attempt — but does it address the root cause?" },
-      { label: "b) Check load balancer health check logs", description: "See if backends are being marked unhealthy" },
-      { label: "c) Increase the client timeout value", description: "Masks the symptom — the timeouts still happen" },
-      { label: "d) Add more backend instances", description: "Helps with capacity, but is capacity the issue?" }
+      { label: "a) Restart the load balancer", description: "Restart the network component" },
+      { label: "b) Check load balancer health check logs", description: "Inspect the recorded health checks" },
+      { label: "c) Increase the client timeout value", description: "Allow clients to wait longer" },
+      { label: "d) Add more backend instances", description: "Increase the number of backends" }
     ]
   }]
 })
@@ -87,8 +91,8 @@ AskUserQuestion({
 **Rules for AskUserQuestion challenges:**
 - Provide exactly 4 options
 - Randomize the correct answer position
-- Write educational descriptions for each option — they serve as subtle hints and teach even as the student reads
-- The `header` field should indicate the challenge type (e.g., "Scenario Challenge", "Conceptual Challenge")
+- Write neutral descriptions that do not reveal which choice is correct; explain after the answer
+- Keep `header` at most 12 characters; indicate the challenge type (e.g., "Scenario", "Conceptual")
 - If the student selects "Other" (custom input), treat it as an open-ended answer and evaluate accordingly
 
 **When NOT to use AskUserQuestion:**
@@ -114,16 +118,16 @@ After the student submits their answer:
 - If partially correct: credit what's right, explain what's missing
 - If wrong: record misconception, explain with source links, offer a simpler version
 
-**2. Update topic file** `~/.local/share/claude-education/topics/<slug>.json`:
+**2. Update topic file** `<education-db>/topics/<slug>.json`:
 - If correct and topic was `surface` depth → promote to `working`
 - If correct with good explanation and topic was `working` → promote to `deep`
 - If wrong → add misconception, consider demoting status
 - Update `last_reviewed` and recalculate `next_review`
 
-**3. Update dashboard** `~/.local/share/claude-education/dashboard.json`:
+**3. Update dashboard** `<education-db>/dashboard.json`:
 - Update topic entry with new status/depth
 
-**4. Append to session log** `~/.local/share/claude-education/sessions/[date].jsonl`:
+**4. Append to session log** `<education-db>/sessions/[date].jsonl`:
 ```jsonl
 {"time": "[now]", "event": "challenge", "topic": "[slug]", "passed": true, "depth_before": "surface", "depth_after": "working"}
 ```
@@ -132,6 +136,6 @@ After the student submits their answer:
 
 ## Integration with Other Skills
 
-- **`/quiz-me`** — challenges are more hands-on than quizzes. Use challenges to promote depth, quizzes to test breadth.
-- **`/ascii`** — if the challenge involves a visual concept, offer to illustrate after evaluation.
-- **`/progress`** — student can check how challenges affected their dashboard.
+- **`/claude-teacher:quiz-me`** — challenges are more hands-on than quizzes. Use challenges to promote depth, quizzes to test breadth.
+- **`/claude-teacher:ascii`** — if the challenge involves a visual concept, offer to illustrate after evaluation.
+- **`/claude-teacher:progress`** — student can check how challenges affected their dashboard.

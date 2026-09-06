@@ -1,8 +1,12 @@
 ---
 name: ascii
-description: "DEFAULT diagram skill — simplest tier. Use when user invokes /ascii OR when suggesting a quick visual. Creates ASCII art rendered inline in terminal — zero friction. Escalate to /excalidraw for complex static diagrams (5+ components, multi-layer). Escalate to /demo for animated/dynamic concepts (protocol handshakes, algorithm traces, state transitions)."
+description: "DEFAULT diagram skill — simplest tier. Use when user invokes /claude-teacher:ascii OR when suggesting a quick visual. Creates ASCII art rendered inline in terminal — zero friction. Escalate to /claude-teacher:excalidraw for complex static diagrams (5+ components, multi-layer). Escalate to /claude-teacher:demo for animated/dynamic concepts (protocol handshakes, algorithm traces, state transitions)."
 argument-hint: "[concept]"
 ---
+
+Requested topic/task: $ARGUMENTS
+
+Before accessing education data, read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md`. Resolve every `<education-db>` below using that contract. Current session ID: `${CLAUDE_SESSION_ID}`.
 
 # ASCII
 
@@ -10,7 +14,7 @@ Create ASCII art diagrams with detailed educational explanations. All output is 
 
 ## Invocation
 
-`/ascii <concept description>`
+`/claude-teacher:ascii <concept description>`
 
 ## Style Selection
 
@@ -114,13 +118,13 @@ Create ASCII art diagrams with detailed educational explanations. All output is 
 
 1. **Analyze** the concept — what type of information is it?
 2. **Pick style** using the selection table
-3. **Create the diagram** in a `text` code block:
+3. **Research the concept** using WebSearch before creating the diagram — verify accuracy against official docs, RFCs, or standards. Include source links.
+4. **Create the diagram** in a `text` code block:
    - Max width 78 characters
    - Generous whitespace — padding inside boxes
    - Standardize box widths where possible
    - Center vertical connectors under boxes
    - Break complex concepts into multiple smaller diagrams
-4. **Research the concept** using WebSearch before creating the diagram — verify accuracy against official docs, RFCs, or standards. Include source links.
 5. **Write educational explanation:**
    - **What it shows** — walk through the diagram
    - **Why it works this way** — reasoning behind the design
@@ -142,19 +146,19 @@ Create ASCII art diagrams with detailed educational explanations. All output is 
 After creating the diagram and explanation:
 
 1. **Save to project-local** `docs/<concept-name>.md` (for project-specific concepts)
-2. **Save to global** `~/.local/share/claude-education/docs/<concept-name>.md` (for general concepts)
-3. **Append to session log** `~/.local/share/claude-education/sessions/[date].jsonl`:
+2. **Save to global** `<education-db>/docs/<concept-name>.md` (for general concepts)
+3. **Append to session log** `<education-db>/sessions/[date].jsonl`:
    ```jsonl
    {"time": "[now]", "event": "ascii", "topic": "[concept-slug]", "saved_to": "global|project|both"}
    ```
-4. If the concept corresponds to a tracked topic, update `last_reviewed` in its topic file
+4. If the concept corresponds to a tracked topic, update only `last_seen`; preserve its assessment dates and review interval
 
 ## Integration with Other Skills
 
 This skill is part of the **claude-teacher** plugin:
 
-- **`/quiz-me`** — if a student gets a visual concept wrong during a quiz, suggest illustrating it.
-- **`/challenge`** — challenges may need diagrams as part of the answer.
-- **`/progress`** — diagrams count toward topic engagement.
+- **`/claude-teacher:quiz-me`** — if a student gets a visual concept wrong during a quiz, suggest illustrating it.
+- **`/claude-teacher:challenge`** — challenges may need diagrams as part of the answer.
+- **`/claude-teacher:progress`** — diagrams count toward topic engagement.
 - Diagrams saved to `docs/` become the student's personal reference library.
-- The tutor (via CLAUDE.md) will suggest `/ascii` when visual explanation helps.
+- The tutor (via CLAUDE.md) will suggest `/claude-teacher:ascii` when visual explanation helps.

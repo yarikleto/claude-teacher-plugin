@@ -4,27 +4,31 @@ description: Use when the student wants a structured side-by-side comparison of 
 argument-hint: "[concept A] vs [concept B]"
 ---
 
+Requested topic/task: $ARGUMENTS
+
+Before accessing education data, read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md`. Resolve every `<education-db>` below using that contract. Current session ID: `${CLAUDE_SESSION_ID}`.
+
 # Compare — Side-by-Side Concept Comparisons
 
 Creates a structured, researched comparison of two concepts. Adapts depth and language to the student's level. Results are saved to both project-local and global education docs.
 
 ## Invocation
 
-`/compare <concept A> vs <concept B>`
+`/claude-teacher:compare <concept A> vs <concept B>`
 
 Examples:
-- `/compare TCP vs UDP`
-- `/compare REST vs GraphQL`
-- `/compare mutex vs semaphore`
-- `/compare Docker vs VMs`
-- `/compare SQL vs NoSQL`
+- `/claude-teacher:compare TCP vs UDP`
+- `/claude-teacher:compare REST vs GraphQL`
+- `/claude-teacher:compare mutex vs semaphore`
+- `/claude-teacher:compare Docker vs VMs`
+- `/claude-teacher:compare SQL vs NoSQL`
 
 ## Process
 
-1. Parse the two concepts from the invocation (split on `vs`, `versus`, or `and`)
-2. Read `~/.local/share/claude-education/student.json` — adapt to level, interests, and learning style
-3. Read `~/.local/share/claude-education/dashboard.json` — check if either concept is already tracked
-4. If tracked, read `~/.local/share/claude-education/topics/<concept>.json` for each — check depth, misconceptions
+1. Parse the two concepts from the invocation (prefer `vs` or `versus`; ask if the boundary is ambiguous instead of splitting names that contain `and`)
+2. Read `<education-db>/student.json` — adapt to level, interests, and learning style
+3. Read `<education-db>/dashboard.json` — check if either concept is already tracked
+4. If tracked, read `<education-db>/topics/<concept>.json` for each — check depth, misconceptions
 5. **Use WebSearch to research BOTH concepts** before writing the comparison — never rely solely on training data. Search for official documentation, authoritative articles, and recent best-practice guides for each concept.
 6. Generate the structured comparison (see Output Format below)
 7. Save comparison to docs and update DB (see DB Update below)
@@ -99,9 +103,9 @@ Include 2-4 misconceptions. If the student has recorded misconceptions about eit
 8. **After the comparison, suggest next steps:**
    ```
    Want to go deeper?
-   - /illustrate [concept] — visualize how each works under the hood
-   - /quiz-me [concept] — test your understanding of either concept
-   - /challenge [concept] — hands-on practice with one of them
+   - /claude-teacher:ascii [concept] — visualize how each works under the hood
+   - /claude-teacher:quiz-me [concept] — test your understanding of either concept
+   - /claude-teacher:challenge [concept] — hands-on practice with one of them
    ```
 
 ## DB Update
@@ -109,7 +113,7 @@ Include 2-4 misconceptions. If the student has recorded misconceptions about eit
 After generating the comparison:
 
 **1. Save comparison doc** to both locations:
-- Global: `~/.local/share/claude-education/docs/<concept-a>-vs-<concept-b>.md`
+- Global: `<education-db>/docs/<concept-a>-vs-<concept-b>.md`
 - Project-local: `docs/<concept-a>-vs-<concept-b>.md` (if `docs/` directory exists in the project)
 
 Each saved doc includes:
@@ -118,23 +122,23 @@ Each saved doc includes:
 - Date saved
 - Related topics
 
-**2. Update topic files** — for each concept that exists in `~/.local/share/claude-education/topics/`:
-- Update `last_reviewed` to today
+**2. Update topic files** — for each concept that exists in `<education-db>/topics/`:
+- Update only `last_seen` to today
 - Add the other concept to `related_topics` if not already present
-- Recalculate `next_review` based on current `review_interval_days`
+- Preserve `last_reviewed`, `next_review`, and `review_interval_days` until an assessment
 
-**3. Update dashboard** `~/.local/share/claude-education/dashboard.json`:
-- Update `last_reviewed` for any tracked concepts
+**3. Update dashboard** `<education-db>/dashboard.json`:
+- Update `last_seen` for any tracked concepts
 - If either concept is new and has not been covered before, do NOT create a topic entry — comparisons alone are not enough to mark a topic as `learned`. Instead, suggest: "Want me to teach [concept] in depth? Then we can track it."
 
-**4. Append to session log** `~/.local/share/claude-education/sessions/[date].jsonl`:
+**4. Append to session log** `<education-db>/sessions/[date].jsonl`:
 ```jsonl
 {"time": "[now]", "event": "compare", "concepts": ["<concept-a>", "<concept-b>"], "level_adapted": "<student-level>"}
 ```
 
 ## Integration with Other Skills
 
-- **`/illustrate [concept]`** — visualize how each concept works under the hood (suggest after comparison)
-- **`/quiz-me [concept]`** — test understanding of either concept after comparing
-- **`/challenge [concept]`** — hands-on practice with one of the compared concepts
-- **`/save-progress`** — comparison results are auto-saved, but student can explicitly checkpoint
+- **`/claude-teacher:ascii [concept]`** — visualize how each concept works under the hood (suggest after comparison)
+- **`/claude-teacher:quiz-me [concept]`** — test understanding of either concept after comparing
+- **`/claude-teacher:challenge [concept]`** — hands-on practice with one of the compared concepts
+- **`/claude-teacher:save-progress`** — comparison results are auto-saved, but student can explicitly checkpoint

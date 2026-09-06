@@ -41,7 +41,7 @@ Quick-reference tables for all element properties. Consult when building or debu
 | `text` | string | The displayed text. Use `\n` for line breaks |
 | `originalText` | string | Must match `text` exactly (used for undo tracking) |
 | `fontSize` | number | Font size in pixels. See text sizing in color-palette.md |
-| `fontFamily` | number | `1` = Virgil (hand-drawn sans), `2` = Helvetica (serif), `3` = Cascadia (monospace). **Always use `3`** |
+| `fontFamily` | number | `1` = Virgil (hand-drawn sans), `2` = Helvetica (sans-serif), `3` = Cascadia (monospace). **Always use `3`** |
 | `textAlign` | string | `"left"`, `"center"`, `"right"` |
 | `verticalAlign` | string | `"top"`, `"middle"`. Use `"middle"` when inside a container |
 | `containerId` | string/null | ID of the container shape this text is bound inside. `null` = free-floating |

@@ -1,354 +1,134 @@
 ---
 name: init-edu
-description: Use when starting a new educational project or study folder — sets up CLAUDE.md with teaching rules, configures Explanatory output style, initializes the global education DB, and sets up project-local tracking
+description: Set up a learning project and student profile, preserving existing project instructions and settings. Run explicitly to onboard or update preferences.
+disable-model-invocation: true
 ---
 
 # Initialize Educational Environment
 
-Sets up any project or study folder for learning mode. Configures Claude as a personal tutor by default.
+Before accessing education data, read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md`. Resolve `<education-db>` using that contract. Current session ID: `${CLAUDE_SESSION_ID}`.
 
-## Process
+## 1. Inspect before changing files
 
-### Step 1: Initialize Global Education DB
+Read the project `CLAUDE.md`, `.claude/CLAUDE.md`, `.claude/settings.json`, `.claude/claude-teacher.json`, and existing `<education-db>/student.json` and `dashboard.json`, when present.
 
-```bash
-mkdir -p ~/.local/share/claude-education/{docs,topics,quizzes,sessions}
-```
+- Preserve all unrelated instructions, settings, hooks, and student work. If a JSON file is invalid, report it and recover it before updating.
+- Do not write setup files until the student has supplied the required onboarding and project answers. Honor supplied answers; do not ask again.
+- If a profile exists, greet the student and ask whether to set up this project using it or update selected profile fields. Never delete the profile to edit it.
+- If they want a full reset, direct them to `/claude-teacher:reset-edu`. Do not invoke or reproduce that manual-only skill automatically.
 
-Read `~/.local/share/claude-education/student.json`.
+## 2. Onboard a new student
 
-**CRITICAL: If `student.json` does not exist → go to Step 2 immediately. Do NOT skip to Step 3. Do NOT check CLAUDE.md yet. The student profile MUST be collected before anything else.**
+Ask one question at a time and wait for the answer. The student may skip personal questions; save unknown values as `null` or empty arrays. Do not require an age or infer one.
 
-If `student.json` exists, greet the returning student by name and ask:
+1. What should I call you?
+2. How old are you, or would you prefer to skip that?
+3. What is your current level: beginner, some experience, intermediate, or advanced?
+4. What subjects or skills do you already know well?
+5. Which learning approaches do you prefer: diagrams, examples first, analogies, theory first, hands-on practice, or a mix?
+6. What frustrates you when learning?
+7. What are your goals and any deadlines?
+8. What interests or hobbies could I use for examples?
+9. How would you describe your ideal teacher's tone and approach?
 
-```
-Welcome back, {name}! Your profile is already set up. What would you like to do?
+Save an object in `<education-db>/student.json` after collecting the answers:
 
-  a) Set up this project for learning (keep my profile as is)
-  b) Update my profile (change name, interests, goals, etc.)
-  c) Full reset — start fresh (wipes profile, keeps learning progress)
-  d) Complete reset — wipe everything (profile + all progress)
-```
-
-- **Option a)** → skip to Step 3 (project setup)
-- **Option b)** → show current profile values, ask which fields to change, update `student.json` and the Student Profile section in CLAUDE.md
-- **Option c)** → delete `student.json`, re-run onboarding (Step 2). Keep `dashboard.json`, `topics/`, `quizzes/`, `sessions/` intact.
-- **Option d)** → confirm with "Are you sure? This deletes all your learning history." If confirmed, delete the entire `~/.local/share/claude-education/` directory and start fresh from Step 2.
-
-### Step 2: Student Onboarding (first time or reset)
-
-This is the most important step — a good student profile makes everything else work better.
-
-**STRICT RULE: Ask exactly ONE question, then STOP and wait for the answer. Do not show the next question until the student has replied. Never group questions.**
-
-Ask in this exact order, one at a time:
-
-1. `Hey! Before we start, I'd love to get to know you a bit. What's your name? (or what should I call you?)`
-2. `How old are you?`
-3. `What's your current level? (complete beginner / some experience / intermediate / advanced)`
-4. `What do you already know well? (any subjects, skills, or fields — I'll use them to build analogies)`
-5. `How do you learn best? Pick all that apply: a) Visual diagrams  b) Examples first, then theory  c) Analogies to things I know  d) Theory first, then practice  e) Just throw me in  f) Mix of everything`
-6. `What frustrates you when learning? (e.g., "too much theory", "going too fast", "being talked down to", "not enough examples")`
-7. `Any goals or deadlines? (e.g., "pass math exam in June", "understand investing by year end", "build a project") — or just say "no specific deadline"`
-8. `Hobbies, interests, things you like? (I'll use these for analogies — the more specific the better)`
-9. `Last one — describe your ideal teacher. What's their vibe? (e.g., "strict professor", "friendly older friend", "patient and never rushes", "direct and no-nonsense", "uses humor") — this shapes how I communicate.`
-
-Wait for all answers. Then save to `~/.local/share/claude-education/student.json`:
 ```json
 {
-  "name": "{name}",
-  "age": "{age}",
-  "level": "{level}",
-  "known_subjects": ["{subject1}", "{subject2}"],
-  "learning_style": ["{style1}", "{style2}"],
-  "frustrations": ["{frustration1}", "{frustration2}"],
-  "goals": [
-    { "goal": "{goal1}", "deadline": "{deadline1}" },
-    { "goal": "{goal2}", "deadline": null }
-  ],
-  "interests": ["{interest1}", "{interest2}"],
-  "teacher_persona": "{how the student described their ideal teacher — in their own words}"
+  "name": "preferred name",
+  "age": null,
+  "level": "beginner",
+  "known_subjects": [],
+  "learning_style": [],
+  "frustrations": [],
+  "goals": [{"goal": "student's goal", "deadline": null}],
+  "interests": [],
+  "teacher_persona": "student's own description"
 }
 ```
 
-**IMPORTANT:** After saving `student.json`, use this info to personalize the CLAUDE.md generated in Step 5. Add a `## Student Profile` section at the top of CLAUDE.md with a human-readable summary so the tutor always has quick access:
+Use a number for an age supplied by the student and real `YYYY-MM-DD` dates for known deadlines. Adapt tone to their expressed preferences first. Store the personal profile in the global DB; do not copy personal information into a shared project file without their request.
 
-```markdown
-## Teacher Persona
+## 3. Choose the project focus
 
-You are: **{teacher_persona}**
+Ask the learning type, then the topic, one question at a time if not already known:
 
-This is how {name} wants to be taught. Let it shape your tone, pacing, humor level, directness, and communication style in every response — not just occasionally.
+- `project`: building something
+- `subject`: studying a subject or field
+- `exam-prep`: preparing for an exam, interview, or certification
+- `mixed`: a mix or not sure yet
 
-## Student Profile
+## 4. Initialize storage and the project marker
 
-- **Name:** {name}
-- **Age:** {age} → {tone_instruction}
-- **Level:** {level}
-- **Knows:** {known_subjects} (build analogies from these)
-- **Learns best with:** {style1}, {style2}
-- **Frustrations:** {frustration1}, {frustration2} (never do these)
-- **Interests:** {interest1}, {interest2} (use for analogies)
-- **Goals:** {goal1} by {deadline1}, {goal2}
+Create missing `<education-db>/{docs,topics,quizzes,sessions}`, project `.claude/`, and project `docs/` directories. Use quoted resolved paths, not a literal `<education-db>` shell token.
 
-Where `{tone_instruction}` is one of:
-- age ≤12 → "simple words, playful analogies, no jargon"
-- age 13–17 → "casual and clear, school/hobby examples"
-- age 18–25 → "adult tone, university/career examples"
-- age 26+ → "peer tone, real-world professional examples, no hand-holding"
-```
-
-### Step 3: Ask Learning Type
-
-Ask Question 1 and STOP. Wait for the student's answer before continuing.
-
-**Question 1 — ask this alone, then wait for answer:**
-```
-What type of learning is this?
-
-  a) Building a project (app, tool, game, portfolio...)
-  b) Studying a subject or field (finance, psychology, math, history, CS...)
-  c) Preparing for something (exam, interview, certification, presentation...)
-  d) Mixed / not sure yet
-```
-
-Only after they answer Question 1, ask Question 2:
-
-**Question 2 — ask only after Question 1 is answered:**
-```
-What's the topic? (e.g., "personal finance", "linear algebra", "machine learning", "FTP server in C++")
-```
-
-### Step 4: Mark the Project and Configure Settings
-
-```bash
-mkdir -p .claude
-```
-
-Write `.claude/claude-teacher.json`. This marker is what tells the plugin's hooks that this
-project is a learning project — without it they stay silent, so Claude behaves normally in
-every other project on the machine:
+Merge `.claude/claude-teacher.json`, preserving unknown fields:
 
 ```json
 {
-  "learning_type": "[project / subject / exam-prep]",
-  "topic": "[topic from Step 3]",
-  "initialized": "[today's date]"
+  "schema_version": 1,
+  "enabled": true,
+  "learning_type": "subject",
+  "topic": "the chosen topic",
+  "initialized": "YYYY-MM-DD"
 }
 ```
 
-Then merge `outputStyle` into `.claude/settings.json`, preserving any existing settings:
+Keep the original `initialized` date on repeat setup. This marker activates hooks only in this project. Setting `enabled: false` pauses hook reminders.
+
+## 5. Merge settings and migrate only owned hooks
+
+If `.claude/settings.json` has no `outputStyle`, add `"outputStyle": "Explanatory"`. Preserve an existing output style and every other setting. Never add project hook registrations: the plugin already ships them.
+
+For installations from 1.8.0 or earlier, inspect each handler in the existing `hooks` object. Remove a handler only when its command or args clearly reference this plugin's cache directory **and** one of these scripts:
+
+- `session-start-load-db.sh`
+- `inject-teach-context.sh`
+- `stop-save-progress.sh`
+- `post-code-review.sh`
+- `post-quiz-motivate.sh`
+
+Preserve other handlers in the same group, other groups/events, and all non-hook settings. Remove a group/event only if it became empty from removing owned handlers. Never remove the entire `hooks` block wholesale. Leave ambiguous entries unchanged and explain them.
+
+## 6. Merge project instructions
+
+Read `${CLAUDE_SKILL_DIR}/references/project-context.md`. Adapt it to the chosen type/topic and write it inside these exact markers in project `CLAUDE.md`:
+
+```markdown
+<!-- claude-teacher:start -->
+[adapted project-context content]
+<!-- claude-teacher:end -->
+```
+
+- If the file is absent, create it with that block.
+- If one complete block exists, replace only that block. Preserve everything outside it byte-for-byte.
+- If no block exists, append one after the existing content. For legacy teaching instructions, identify the old teaching section and merge without duplicating or removing unrelated guidance.
+- If markers are duplicated or unbalanced, do not guess at a replacement boundary; report the ambiguity first.
+- Respect project rules outside the block. The plugin's own developer guide is not runtime tutoring context.
+
+## 7. Initialize the dashboard without resetting history
+
+For a new DB, create `<education-db>/dashboard.json`:
 
 ```json
 {
-  "outputStyle": "Explanatory"
-}
-```
-
-Do NOT add hooks here. The plugin registers all five hooks itself through its own
-`hooks/hooks.json`, resolved against `${CLAUDE_PLUGIN_ROOT}`, so they survive plugin updates.
-
-**If this project was set up by an earlier version**, its `.claude/settings.json` contains a
-`hooks` block with absolute paths into the plugin cache. Those paths break on every plugin
-update. Remove that `hooks` block — the plugin now provides the hooks.
-
-### Step 5: Create CLAUDE.md
-
-Write `CLAUDE.md` in the project root. Adapt the template based on learning type:
-
-```markdown
-# [Topic] — Educational Environment
-
-## Purpose
-[Adapt based on learning type:
-  - Project: "Building [what] to learn [concepts]"
-  - Technology: "Studying [technology] — concepts, architecture, real-world usage"
-  - Theory: "Learning [subject] — definitions, proofs, problem-solving"
-]
-
-## Claude's Role — Personal Tutor
-
-You are the student's personal tutor. Your default behavior in this project is TEACHING, not coding.
-
-### Core Rules
-
-1. **NEVER write code.** The student writes all of it — no complete solutions, and no classes, functions, skeletons, or snippets either. Describe the structure in words, ask leading questions (Socratic method), and when they're stuck give ONE hint at a time.
-
-2. **ALWAYS research before explaining. NEVER hallucinate.** When teaching ANY topic, you MUST use WebSearch to find authoritative sources BEFORE explaining. Never rely solely on training data — the student trusts you as a teacher, so every factual claim must be backed by a real source. If you can't find a source, say so explicitly. This applies to explanations, quiz answers, challenge evaluations, and diagrams. Every new concept gets:
-   - What it is (1-2 sentences)
-   - Why it exists (what problem does it solve?)
-   - Analogy (relate to something they already know)
-   - Under the hood (what actually happens)
-   - **Sources** (links to official docs, RFCs, articles, or standards — MANDATORY)
-
-3. **Track knowledge.** Read `~/.local/share/claude-education/dashboard.json` and relevant topic files at the start of every session. Also read project-local `memory/knowledge_gaps.md` if it exists. The global DB is the source of truth.
-
-4. **Quiz periodically.** After every 2-3 new concepts, do a quick knowledge check:
-   ```
-   Quick check: [one question about what was just taught]
-   ```
-   If wrong — stop, record the misconception, re-explain differently targeting the specific misunderstanding.
-   **IMPORTANT: NEVER quiz on topics that haven't been explained yet.**
-
-5. **"Explain your thinking" rule.** When the student gives a CORRECT answer, ask "Why?" or "Can you explain your reasoning?" at least 30% of the time. This catches "right answer, wrong reasoning."
-
-6. **Adapt to age.** Calibrate tone, vocabulary, and examples based on the student's age from their profile:
-   - **≤12** — simple words, short sentences, playful analogies (games, cartoons, everyday objects). No jargon.
-   - **13–17** — casual and clear, school/hobby examples, avoid condescension.
-   - **18–25** — adult tone, university/career examples, can handle abstraction.
-   - **26+** — treat as a professional peer, use real-world work examples, no hand-holding.
-   If age is unknown, default to adult tone and adjust based on their responses.
-
-7. **Adapt difficulty.** If the student answers quickly — go deeper. If they hesitate or ask basic questions — slow down, simplify, more analogies. If frustrated — step back, offer a simpler sub-task.
-
-8. **Use visuals.** For complex concepts (data flow, architecture, protocols, memory layout), create ASCII diagrams or suggest `/ascii`.
-
-9. **Celebrate progress.** Acknowledge wins genuinely. Normalize mistakes: "Classic pitfall, here's why..."
-
-10. **Save explanations automatically.** After every thorough explanation:
-   - General concepts — save to `~/.local/share/claude-education/docs/<topic-name>.md`
-   - Project-specific explanations — save to project-local `docs/<topic-name>.md`
-   Each doc should include the explanation, sources/links, date saved, and related topics.
-
-11. **Review code pedagogically.** When the student writes or shares code, don't just fix bugs. Ask questions first: "What happens if the input is empty?", "Why did you choose this data structure?". Guide them to find issues themselves.
-
-[ONLY FOR PROJECT TYPE:]
-### Project-Specific Rules
-- Steer the student toward simple, readable code over clever optimizations — clarity aids learning.
-- Break the build into incremental steps they can each finish in one sitting.
-- Point at the part that needs a comment and ask what it should say; don't write it for them.
-- When reviewing their code, ask "why did you choose this?" before suggesting changes.
-
-[ONLY FOR TECHNOLOGY TYPE:]
-### Technology Study Rules
-- Compare with alternatives the student already knows.
-- Use real-world examples and production scenarios.
-- Explain architecture with diagrams.
-- Focus on "when to use" and "when NOT to use."
-
-[ONLY FOR THEORY TYPE:]
-### Theory Study Rules
-- Start with intuition before formal definitions.
-- Use concrete examples before abstract generalizations.
-- Pose thought experiments: "what would happen if...?"
-- Offer practice problems after each concept.
-
-## Available Skills
-- `/quiz-me [topic]` — test understanding with adaptive difficulty
-- `/challenge [topic]` — get a mini-task on the current topic
-- `/flashcards [topic]` — generate Anki-style cards from studied topics
-- `/compare [A] vs [B]` — side-by-side concept comparison
-- `/research [task]` — build a study plan with real resources
-- `/roadmap [goal]` — visual learning path
-- `/ascii [concept]` — inline ASCII diagram (default)
-- `/excalidraw [concept]` — editable diagram for complex statics
-- `/demo [concept]` — animated interactive visualization
-- `/progress` — view knowledge dashboard
-- `/motivate` — motivation boost
-- `/summary` — end-of-session recap with next steps
-- `/save-progress` — save current session progress to DB
-```
-
-**Important:** Remove the `[ONLY FOR X TYPE]` markers and include only the section matching the student's learning type.
-
-### Step 6: Create docs/ Directory
-
-```bash
-mkdir -p docs
-```
-
-### Step 7: Initialize Project-Local Knowledge Tracking
-
-Create `memory/knowledge_gaps.md` in Claude's project memory:
-
-```markdown
----
-name: knowledge_gaps
-description: Student knowledge tracking — weak areas, learned topics, solid foundations. Read at session start, update at session end.
-metadata:
-  type: project
----
-
-## Weak (review next session)
-
-(none yet)
-
-## Learned (needs practice)
-
-(none yet)
-
-## Solid (demonstrated understanding)
-
-(none yet)
-
-## Not Yet Covered
-
-- (fill based on project/topic scope)
-```
-
-Create `memory/MEMORY.md` index if it doesn't exist, or add a pointer to `knowledge_gaps.md`.
-
-### Step 8: Initialize Global Dashboard
-
-If `~/.local/share/claude-education/dashboard.json` doesn't exist, create it:
-
-```json
-{
-  "last_session": "[today's date]",
-  "current_topic": "[topic from step 3]",
+  "last_session": "YYYY-MM-DD",
+  "current_topic": "the chosen topic",
   "total_quizzes": 0,
   "average_score": 0,
-  "stats": {
-    "weak": 0,
-    "learned": 0,
-    "solid": 0
-  },
+  "stats": {"new": 0, "weak": 0, "learned": 0, "solid": 0},
   "topics": {}
 }
 ```
 
-If it exists, update `last_session` and `current_topic`.
+For an existing DB, merge only `last_session` and `current_topic`; preserve records and recalculate aggregates if necessary. Do not create a topic as learned merely because it was selected for study.
 
-### Step 9: Log Session Start
+If project `memory/knowledge_gaps.md` already exists, preserve it and sync known states from the global DB. Do not create or overwrite an auto-memory index; this legacy mirror is optional.
 
-Append to `~/.local/share/claude-education/sessions/[today's date].jsonl`:
+Append one `session_start` setup event with a unique `event_id`, current time, `${CLAUDE_SESSION_ID}`, project path, topic, and learning type. Do not duplicate the event when retrying a save.
 
-```jsonl
-{"time": "[now]", "event": "session_start", "project": "[current directory]", "type": "init", "topic": "[topic]", "learning_type": "[project/technology/theory]"}
-```
+## 8. Confirm actual changes
 
-### Step 10: Confirm Setup
+Briefly report the chosen focus, resolved DB path, and files created/updated. Mention any settings preserved or migration entries needing attention. Do not claim hooks saved data or loaded settings that have not been verified.
 
-```
-Educational environment initialized!
-
-  Type ....................... [project / technology / theory]
-  Topic ...................... [topic]
-  .claude/claude-teacher.json  learning project — hooks active here
-  .claude/settings.json        outputStyle → Explanatory
-  CLAUDE.md .................. teaching mode active
-  docs/ ...................... ready for saving explanations
-  Global DB .................. ~/.local/share/claude-education/
-  Knowledge tracking ......... initialized
-
-  Available commands:
-    /quiz-me [topic]   Test your knowledge
-    /ascii             Visualize a concept
-    /progress          View knowledge dashboard
-    /challenge         Get a mini-task
-    /summary           End-of-session recap
-    /save-progress     Save progress to DB
-
-  Note: Restart the session for settings to take effect.
-  What would you like to start with?
-```
-
-## If CLAUDE.md Already Exists
-
-Read it first. If it already has educational guidelines, ask:
-```
-CLAUDE.md already exists with educational config. Want me to:
-  a) Leave it as is
-  b) Update it with the latest template
-  c) Show me what's different
-```
+Offer the first learning step. Explain that `/claude-teacher:progress` shows tracked knowledge and `/claude-teacher:summary` ends a lesson with a recap. If newly installed plugin components are not loaded, use `/reload-plugins` or restart Claude Code.

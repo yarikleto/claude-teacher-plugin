@@ -13,8 +13,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 teach_is_learning_project "$INPUT" || exit 0
 
-COMMAND=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""')
-ERROR=$(printf '%s' "$INPUT" | jq -r '.error // ""')
+COMMAND=$(printf '%s' "$INPUT" | jq -r '.tool_input.command | select(type == "string")' 2>/dev/null)
+ERROR=$(printf '%s' "$INPUT" | jq -r '.error | select(type == "string")' 2>/dev/null)
 INTERRUPT=$(printf '%s' "$INPUT" | jq -r '.is_interrupt // false')
 
 # A cancelled command is not a failed attempt.
@@ -22,13 +22,14 @@ INTERRUPT=$(printf '%s' "$INPUT" | jq -r '.is_interrupt // false')
 [ -z "$ERROR" ] && exit 0
 
 # Housekeeping commands the tutor runs itself, not the student's work.
+# Only skip simple housekeeping. A compound command may run student tests.
 case "$COMMAND" in
-  git*|mkdir*|curl*|jq*|cat*|ls*|cd*|echo*|rm*|npm*install*|pip*install*) exit 0 ;;
+  *'&&'*|*';'*|*'|'*|*$'\n'*) ;;
+  git|git\ *|mkdir\ *|curl\ *|jq\ *|cat\ *|ls|ls\ *|cd\ *|echo\ *|rm\ *|npm\ install*|pip\ install*) exit 0 ;;
 esac
 
-# The error opens with a summary line; the rest is usually a stack trace.
-SUMMARY=$(printf '%s' "$ERROR" | head -1)
-
-teach_emit_context "PostToolUseFailure" "The student's code just failed ($SUMMARY). Walk them toward the cause with questions rather than handing over a fix. If this is a repeated failure, offer encouragement or run /motivate — frustration is the biggest barrier to learning."
+# The existing tool result already contains the error. Do not repeat arbitrary
+# command output as plugin instructions, or assume Claude's failure is theirs.
+teach_emit_context "PostToolUseFailure" "A Bash tool call failed. If it ran the student's exercise or tests, help them reason through the error with one hint at a time. For repeated difficulty, offer specific encouragement via /claude-teacher:motivate. Diagnose setup, network, permission, or tool failures normally; do not count those as student misconceptions."
 
 exit 0

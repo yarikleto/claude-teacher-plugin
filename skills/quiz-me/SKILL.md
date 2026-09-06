@@ -4,23 +4,27 @@ description: Use when the user wants to be quizzed, tested, or asked questions o
 argument-hint: "[topic]"
 ---
 
+Requested topic/task: $ARGUMENTS
+
+Before accessing education data, read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md`. Resolve every `<education-db>` below using that contract. Current session ID: `${CLAUDE_SESSION_ID}`.
+
 # Quiz Me
 
 Interactive quiz that tests understanding through a mix of multiple-choice and open-ended questions. All results are saved to the global education DB.
 
 ## How to Use
 
-Invoke with `/quiz-me [topic]` or just `/quiz-me` and specify the topic when asked.
+Invoke with `/claude-teacher:quiz-me [topic]` or just `/claude-teacher:quiz-me` and specify the topic when asked.
 
-Examples: `/quiz-me TCP sockets`, `/quiz-me git`, `/quiz-me sorting algorithms`
+Examples: `/claude-teacher:quiz-me TCP sockets`, `/claude-teacher:quiz-me git`, `/claude-teacher:quiz-me sorting algorithms`
 
 ## Quiz Flow
 
 ### Setup
 
-1. Read `~/.local/share/claude-education/dashboard.json` — check topic statuses
-2. Read `~/.local/share/claude-education/student.json` — adapt to learning style
-3. If a topic was given, read `~/.local/share/claude-education/topics/<topic>.json` if it exists — check for unresolved misconceptions and previous scores
+1. Read `<education-db>/dashboard.json` — check topic statuses
+2. Read `<education-db>/student.json` — adapt to learning style
+3. If a topic was given, read `<education-db>/topics/<topic>.json` if it exists — check for unresolved misconceptions and previous scores
 4. If no topic given, pick from: first any topics with `next_review <= today`, then `weak` topics, then `learned` topics
 5. Also check project-local `memory/knowledge_gaps.md` for covered topics
 
@@ -49,7 +53,7 @@ Determine topic → Check for unresolved misconceptions → Ask question → Wai
 
 **Multiple choice — use `AskUserQuestion` tool:**
 
-For every multiple-choice question, use the `AskUserQuestion` tool so the student can select answers with arrow keys. This is MANDATORY — never print multiple-choice options as plain text.
+For every multiple-choice question, use the `AskUserQuestion` tool so the student can select answers with arrow keys. If the tool is unavailable, ask the same question with plain-text options and wait for an answer.
 
 ```
 AskUserQuestion({
@@ -58,21 +62,21 @@ AskUserQuestion({
     header: "Q3",
     multiSelect: false,
     options: [
-      { label: "a) connect()", description: "Initiates a connection to a remote address" },
-      { label: "b) socket()", description: "Creates an endpoint for communication" },
-      { label: "c) bind()", description: "Assigns an address to a socket" },
-      { label: "d) listen()", description: "Marks a socket as passive, waiting for connections" }
+      { label: "a) connect()", description: "Choice A" },
+      { label: "b) socket()", description: "Choice B" },
+      { label: "c) bind()", description: "Choice C" },
+      { label: "d) listen()", description: "Choice D" }
     ]
   }]
 })
 ```
 
-The student selects with arrow keys and Enter — no typing needed. The descriptions in each option serve as subtle hints that help learning even during the quiz.
+The student selects with arrow keys and Enter — no typing needed. Option descriptions must be neutral; explain the choices after the student answers.
 
 **Rules for AskUserQuestion quiz options:**
 - Always provide exactly 4 options for multiple choice
 - Randomize correct answer position (don't always put it in slot b)
-- Write short, educational descriptions for each option — these teach even as the student reads the choices
+- Use neutral descriptions that do not reveal correctness or repeat the question definition. Explain alternatives only after grading
 - The `header` field should be the question number (e.g., "Q1", "Q2")
 - If the student selects "Other" (custom input), treat it as an open-ended answer
 
@@ -112,9 +116,12 @@ Next review: [calculated date]
 ───────────────────────────────────
 ```
 
-**2. Save quiz record** to `~/.local/share/claude-education/quizzes/[date]_[topic-slug].json`:
+**2. Save quiz record** to `<education-db>/quizzes/[date]_[topic-slug]_[quiz-id].json`:
 ```json
 {
+  "quiz_id": "[stable UUID for this attempt]",
+  "session_id": "${CLAUDE_SESSION_ID}",
+  "completed": true,
   "date": "[today]",
   "topic": "[topic-slug]",
   "questions": [
@@ -137,7 +144,9 @@ Next review: [calculated date]
 }
 ```
 
-**3. Update topic file** `~/.local/share/claude-education/topics/[topic-slug].json`:
+If stopped early, save the attempt as `completed: false` and report answered questions without changing mastery or the review interval. Avoid dividing by zero if no questions were answered.
+
+**3. Update topic file** `<education-db>/topics/[topic-slug].json`:
 - Update `quiz_scores` array, `last_reviewed`, `status`, `depth`
 - Add any new misconceptions
 - Recalculate `next_review` using spaced repetition:
@@ -145,14 +154,14 @@ Next review: [calculated date]
   - Score <50%: reset interval to 1 day, demote to `weak`
   - Score 50-79%: keep current interval
 
-**4. Update dashboard** `~/.local/share/claude-education/dashboard.json`:
+**4. Update dashboard** `<education-db>/dashboard.json`:
 - Update topic entry, recalculate `stats`, `total_quizzes`, `average_score`
 
 **5. Update project-local** `memory/knowledge_gaps.md` if it exists.
 
-**6. Append to session log** `~/.local/share/claude-education/sessions/[date].jsonl`:
+**6. Append to session log** `<education-db>/sessions/[date].jsonl`:
 ```jsonl
-{"time": "[now]", "event": "quiz", "topic": "[slug]", "score": 70, "passed": true, "misconceptions_found": 1}
+{"time": "[now]", "event": "quiz", "topic": "[slug]", "score": 70, "passed": false, "misconceptions_found": 1}
 ```
 
 ## Priority Order for Questions
@@ -165,7 +174,7 @@ Next review: [calculated date]
 
 ## Integration with Other Skills
 
-- **`/ascii [concept]`** — if a question involves a visual concept and the student got it wrong, offer to illustrate it.
-- **`/challenge [topic]`** — for hands-on practice after quiz identifies weak areas.
-- **`/progress`** — student can check their overall dashboard.
-- **`/save-progress`** — quiz results are auto-saved, but student can explicitly save mid-session.
+- **`/claude-teacher:ascii [concept]`** — if a question involves a visual concept and the student got it wrong, offer to illustrate it.
+- **`/claude-teacher:challenge [topic]`** — for hands-on practice after quiz identifies weak areas.
+- **`/claude-teacher:progress`** — student can check their overall dashboard.
+- **`/claude-teacher:save-progress`** — quiz results are auto-saved, but student can explicitly save mid-session.

@@ -1,8 +1,12 @@
 ---
 name: excalidraw
-description: "Middle tier — complex STATIC diagrams. Use when user invokes /excalidraw, OR when concept has 5+ components, multi-layer architecture, or detailed data structures that benefit from editable layout. Generates .excalidraw JSON files opened in excalidraw.com or VS Code. For simple visuals use /ascii. For animated/dynamic concepts (protocol handshakes, algorithm traces) use /demo instead."
+description: "Middle tier — complex STATIC diagrams. Use when user invokes /claude-teacher:excalidraw, OR when concept has 5+ components, multi-layer architecture, or detailed data structures that benefit from editable layout. Generates .excalidraw JSON files opened in excalidraw.com or VS Code. For simple visuals use /claude-teacher:ascii. For animated/dynamic concepts (protocol handshakes, algorithm traces) use /claude-teacher:demo instead."
 argument-hint: "[concept]"
 ---
+
+Requested topic/task: $ARGUMENTS
+
+Before accessing education data, read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md`. Resolve every `<education-db>` below using that contract. Current session ID: `${CLAUDE_SESSION_ID}`.
 
 # Excalidraw Diagram
 
@@ -10,7 +14,7 @@ Generate `.excalidraw` JSON files with detailed educational explanations. Produc
 
 ## Invocation
 
-`/excalidraw <concept description>`
+`/claude-teacher:excalidraw <concept description>`
 
 ---
 
@@ -34,9 +38,9 @@ Could someone who knows nothing about this topic learn something concrete from t
 
 Before generating any diagram, read these reference files:
 
-1. **`references/color-palette.md`** — semantic color system, text colors, sizing
-2. **`references/element-templates.md`** — copy-paste JSON for every element type
-3. **`references/json-schema.md`** — property tables, binding rules, options
+1. **`${CLAUDE_SKILL_DIR}/references/color-palette.md`** — semantic color system, text colors, sizing
+2. **`${CLAUDE_SKILL_DIR}/references/element-templates.md`** — copy-paste JSON for every element type
+3. **`${CLAUDE_SKILL_DIR}/references/json-schema.md`** — property tables, binding rules, options
 
 These files contain the exact hex codes, JSON templates, and schema details needed to produce valid diagrams. Do not rely on memory — read them.
 
@@ -93,7 +97,7 @@ Boxes around text are expensive — they add visual noise and make diagrams feel
    - The shape IS the concept (a server, a database, a component)
    - The shape needs arrows connecting to/from it
    - The shape represents a boundary or grouping
-3. **Target: <30% of text elements inside containers.** If more than 30% of your text elements have a `containerId`, you are over-boxing.
+3. **Prefer free-floating annotations; use bound labels where nodes need them.** Node-heavy roadmaps can legitimately have more bound labels; prioritize legibility and correct bindings.
 4. **Use font size, weight, and color for hierarchy** instead of wrapping everything in rectangles. A 28px dark title vs a 14px gray annotation needs no box to show importance.
 
 ---
@@ -225,9 +229,9 @@ Combine all sections into a single `elements` array. Verify all cross-references
 4. **Plan layout with multi-zoom levels** — where does the Level 1 summary flow go? Where do Level 3 evidence artifacts attach? Plan spatial regions.
 
 5. **Read reference files:**
-   - `references/color-palette.md` for colors
-   - `references/element-templates.md` for JSON templates
-   - `references/json-schema.md` for property reference
+   - `${CLAUDE_SKILL_DIR}/references/color-palette.md` for colors
+   - `${CLAUDE_SKILL_DIR}/references/element-templates.md` for JSON templates
+   - `${CLAUDE_SKILL_DIR}/references/json-schema.md` for property reference
 
 6. **Build JSON section-by-section** — follow the section-by-section strategy above. Use templates from element-templates.md as starting points.
 
@@ -263,10 +267,10 @@ Before saving any diagram, verify:
 
 - [ ] **Isomorphism Test** — structure communicates without text
 - [ ] **Education Test** — someone can learn something concrete from this
-- [ ] **Container ratio** — <30% of text elements have `containerId`
+- [ ] **Containers** — each container communicates a node or grouping; bound node labels remain editable
 - [ ] **Binding consistency** — every `boundElements` entry has a matching `containerId` or `startBinding`/`endBinding`; every `containerId` has a matching `boundElements` entry; every arrow binding has matching `boundElements` on both connected shapes
 - [ ] **Descriptive string IDs** — no generic `"id1"`, `"id2"`. Use `"server_rect"`, `"arrow_request"`, `"evidence_payload"`
-- [ ] **Colors from palette** — all colors come from `references/color-palette.md`
+- [ ] **Colors from palette** — all colors come from `${CLAUDE_SKILL_DIR}/references/color-palette.md`
 - [ ] **fontFamily: 3** — monospace for all text elements
 - [ ] **roughness: 0** — clean lines for all elements
 - [ ] **fillStyle: "solid"** — unless there is a specific reason for hatching
@@ -282,12 +286,12 @@ After creating the diagram and explanation:
 
 1. **Save `.excalidraw` file** to `docs/<concept-name>.excalidraw`
 2. **Save/update explanation** in `docs/<concept-name>.md` — mention the diagram file
-3. **Save to global docs** at `~/.local/share/claude-education/docs/<concept-name>.excalidraw` (for general concepts)
-4. **Append to session log** `~/.local/share/claude-education/sessions/[date].jsonl`:
+3. **Save to global docs** at `<education-db>/docs/<concept-name>.excalidraw` (for general concepts)
+4. **Append to session log** `<education-db>/sessions/[date].jsonl`:
    ```jsonl
    {"time": "[now]", "event": "excalidraw", "topic": "[concept-slug]", "file": "docs/[concept-name].excalidraw", "saved_to": "global|project|both"}
    ```
-5. If the concept corresponds to a tracked topic, update `last_reviewed` in its topic file
+5. If the concept corresponds to a tracked topic, update only `last_seen`; preserve its assessment dates and review interval
 
 ---
 
@@ -303,9 +307,9 @@ Tell the student:
 
 ## Integration with Other Skills
 
-- **`/ascii`** — for quick ASCII terminal diagrams (simpler, inline). Use `/excalidraw` when the concept needs more detail or editability
-- **`/demo`** — for animated/dynamic concepts. Use `/excalidraw` for static structure diagrams
-- **`/quiz-me`** — if a visual concept is wrong, suggest `/excalidraw` for interactive exploration
-- **`/challenge`** — challenges may ask the student to modify or extend an Excalidraw diagram
-- **`/progress`** — diagrams count toward topic engagement
+- **`/claude-teacher:ascii`** — for quick ASCII terminal diagrams (simpler, inline). Use `/claude-teacher:excalidraw` when the concept needs more detail or editability
+- **`/claude-teacher:demo`** — for animated/dynamic concepts. Use `/claude-teacher:excalidraw` for static structure diagrams
+- **`/claude-teacher:quiz-me`** — if a visual concept is wrong, suggest `/claude-teacher:excalidraw` for interactive exploration
+- **`/claude-teacher:challenge`** — challenges may ask the student to modify or extend an Excalidraw diagram
+- **`/claude-teacher:progress`** — diagrams count toward topic engagement
 - Saved `.excalidraw` files become part of the student's visual reference library

@@ -3,3 +3,7 @@
 
 # Local Claude Code state, not part of the plugin
 .claude/settings.local.json
+
+# Python test artifacts
+__pycache__/
+*.pyc

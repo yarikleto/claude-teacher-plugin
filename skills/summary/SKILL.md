@@ -3,20 +3,23 @@ name: summary
 description: Use when the student is ending a learning session — generates a recap of what was covered, updates knowledge tracking in the global DB, and suggests what to start with next time
 ---
 
+
+Before accessing education data, read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md`. Resolve every `<education-db>` below using that contract. Current session ID: `${CLAUDE_SESSION_ID}`.
+
 # Session Summary
 
 Generates an end-of-session recap and persists all progress to the global education DB.
 
 ## Invocation
 
-`/summary` — run at the end of a learning session
+`/claude-teacher:summary` — run at the end of a learning session
 
 ## Process
 
 1. Review the current conversation — what topics were discussed, quizzed, challenged?
-2. Read `~/.local/share/claude-education/dashboard.json` for current state
-3. Read relevant `~/.local/share/claude-education/topics/*.json` for topics covered this session
-4. Read `~/.local/share/claude-education/student.json` for goals
+2. Read `<education-db>/dashboard.json` for current state
+3. Read relevant `<education-db>/topics/*.json` for topics covered this session
+4. Read `<education-db>/student.json` for goals
 5. Generate the summary
 6. Update ALL DB files with session results
 7. Update project-local `memory/knowledge_gaps.md` if it exists
@@ -28,7 +31,7 @@ Generates an end-of-session recap and persists all progress to the global educat
   SESSION SUMMARY — [date]
 ══════════════════════════════════════════════════
 
-  Duration: ~[estimate based on conversation length]
+  Duration: [from recorded timestamps, or omit if unknown]
   Project: [current directory]
 
   LEARNED TODAY
@@ -81,26 +84,25 @@ Generates an end-of-session recap and persists all progress to the global educat
 
 ## DB Updates
 
-### 1. Update/create topic files (`~/.local/share/claude-education/topics/<slug>.json`)
+### 1. Update/create topic files (`<education-db>/topics/<slug>.json`)
 
 For each topic covered this session:
 - Create the file if it doesn't exist
 - Update `status` based on session performance
 - Update `depth` if student demonstrated deeper understanding
-- Update `last_reviewed` to today
-- Calculate `next_review` using spaced repetition intervals
+- Preserve assessment dates and intervals unless a new completed assessment has not yet been saved; apply each assessment once using the shared contract
 - Add any new misconceptions discovered
 - Mark any resolved misconceptions as `resolved: true`
 - Add session notes
 
-### 2. Update dashboard (`~/.local/share/claude-education/dashboard.json`)
+### 2. Update dashboard (`<education-db>/dashboard.json`)
 
 - Update `last_session` to today
 - Update `current_topic`
 - Recalculate `stats` (weak/learned/solid counts)
 - Update all topic entries with current status/depth/next_review
 
-### 3. Finalize session log (`~/.local/share/claude-education/sessions/[date].jsonl`)
+### 3. Finalize session log (`<education-db>/sessions/[date].jsonl`)
 
 Append closing entry:
 ```jsonl
@@ -117,7 +119,7 @@ Update `memory/knowledge_gaps.md`:
 
 ### 5. Update student profile if needed
 
-If you learned new things about the student during this session (e.g., they mentioned a new goal, showed a preference for a different explanation style), update `~/.local/share/claude-education/student.json`.
+If you learned new things about the student during this session (e.g., they mentioned a new goal, showed a preference for a different explanation style), update `<education-db>/student.json`.
 
 ## Rules
 

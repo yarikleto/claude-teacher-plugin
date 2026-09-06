@@ -4,7 +4,7 @@ Copy-paste JSON templates for every element type. All templates use:
 - `roughness: 0` (clean lines, not hand-drawn)
 - `fontFamily: 3` (monospace for technical feel)
 - Descriptive string IDs
-- Comments showing which values to customize
+- Customization notes outside JSON blocks; every JSON block parses as JSON
 
 ## Wrapper Structure
 
@@ -15,9 +15,7 @@ Every `.excalidraw` file wraps elements in this:
   "type": "excalidraw",
   "version": 2,
   "source": "claude-teacher",
-  "elements": [
-    /* all elements go here */
-  ],
+  "elements": [],
   "appState": {
     "gridSize": 20,
     "viewBackgroundColor": "#ffffff"
@@ -298,13 +296,15 @@ Connects two shapes. Three things must be consistent: the arrow's bindings AND b
 
 ### Source Shape (already defined above as `server_rect`)
 
-Add the arrow to its `boundElements`:
+Merge this property into the existing source shape; it is not a standalone element:
 
 ```json
-"boundElements": [
-  { "id": "server_label", "type": "text" },
-  { "id": "arrow_request", "type": "arrow" }
-]
+{
+  "boundElements": [
+    { "id": "server_label", "type": "text" },
+    { "id": "arrow_request", "type": "arrow" }
+  ]
+}
 ```
 
 ### Target Shape
@@ -334,6 +334,41 @@ Add the arrow to its `boundElements`:
   "seed": 100040,
   "version": 1,
   "versionNonce": 100040,
+  "isDeleted": false,
+  "updated": 1
+}
+```
+
+### Target Label
+
+```json
+{
+  "id": "client_label",
+  "type": "text",
+  "x": 550,
+  "y": 218,
+  "width": 100,
+  "height": 25,
+  "text": "Client",
+  "fontSize": 20,
+  "fontFamily": 3,
+  "textAlign": "center",
+  "verticalAlign": "middle",
+  "strokeColor": "#1e1e1e",
+  "backgroundColor": "transparent",
+  "fillStyle": "solid",
+  "strokeWidth": 1,
+  "strokeStyle": "solid",
+  "roughness": 0,
+  "opacity": 100,
+  "angle": 0,
+  "groupIds": [],
+  "boundElements": null,
+  "containerId": "client_rect",
+  "originalText": "Client",
+  "seed": 100041,
+  "version": 1,
+  "versionNonce": 100041,
   "isDeleted": false,
   "updated": 1
 }

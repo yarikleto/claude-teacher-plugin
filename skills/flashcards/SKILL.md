@@ -4,22 +4,26 @@ description: Use when the student wants to generate Anki-style flashcards from s
 argument-hint: "[topic]"
 ---
 
+Requested topic/task: $ARGUMENTS
+
+Before accessing education data, read `${CLAUDE_PLUGIN_ROOT}/references/education-data.md`. Resolve every `<education-db>` below using that contract. Current session ID: `${CLAUDE_SESSION_ID}`.
+
 # Flashcards — Anki-Style Card Generation
 
 Generates study flashcards from topics the student has already learned. Cards are prioritized by weakness, misconceptions, and spaced repetition schedule. Exports in Markdown and Anki-compatible CSV.
 
 ## Invocation
 
-`/flashcards` — generate cards for all studied topics, prioritized by need
-`/flashcards [topic]` — generate cards for a specific topic
+`/claude-teacher:flashcards` — generate cards for all studied topics, prioritized by need
+`/claude-teacher:flashcards [topic]` — generate cards for a specific topic
 
 ## Process
 
 ### 1. Load Context
 
-1. Read `~/.local/share/claude-education/dashboard.json` — get all topic statuses
-2. Read `~/.local/share/claude-education/student.json` — adapt card style to learning preferences
-3. If a topic was given, read `~/.local/share/claude-education/topics/<topic>.json` — check depth, misconceptions, quiz history
+1. Read `<education-db>/dashboard.json` — get all topic statuses
+2. Read `<education-db>/student.json` — adapt card style to learning preferences
+3. If a topic was given, read `<education-db>/topics/<topic>.json` — check depth, misconceptions, quiz history
 4. If no topic given, collect all topics from dashboard and read each topic file
 5. **NEVER generate flashcards for topics not in the DB** — the student hasn't learned them yet. If no studied topics exist: "Nothing to make flashcards for yet — let's learn something first!"
 
@@ -83,7 +87,7 @@ Back: [answer]. [Brief explanation of why].
 
 #### Markdown Format
 
-Save as `docs/flashcards-<topic-slug>.md` (project-local) and `~/.local/share/claude-education/docs/flashcards-<topic-slug>.md` (global):
+Save as `docs/flashcards-<topic-slug>.md` (project-local) and `<education-db>/docs/flashcards-<topic-slug>.md` (global):
 
 ```markdown
 # Flashcards: [Topic Name]
@@ -110,23 +114,26 @@ Priority: [weak / review-due / reinforcement]
 
 ---
 
-*Generated from your study progress. Review with `/quiz-me [topic]` or practice with `/challenge [topic]`.*
+*Generated from your study progress. Review with `/claude-teacher:quiz-me [topic]` or practice with `/claude-teacher:challenge [topic]`.*
 ```
 
 #### Anki-Compatible CSV
 
-Save as `docs/flashcards-<topic-slug>.csv` (project-local) and `~/.local/share/claude-education/docs/flashcards-<topic-slug>.csv` (global):
+Save as `docs/flashcards-<topic-slug>.csv` (project-local) and `<education-db>/docs/flashcards-<topic-slug>.csv` (global):
 
 ```
-"Front";"Back";"Tags"
+#separator:Semicolon
+#html:false
+#columns:Front;Back;Tags
+#tags column:3
 "What is [concept]?";"[Answer]. [Why it matters].";"[topic-slug] [card-type] [difficulty]"
 "What happens if [scenario]?";"[Answer]. Common mistake: [misconception].";"[topic-slug] what-happens-if [difficulty]"
 ```
 
 CSV rules:
-- Semicolon-separated (Anki default)
+- UTF-8, semicolon-separated; the `#separator:Semicolon` header makes this explicit
 - All fields double-quoted
-- First row is a header
+- Use the metadata headers shown above for Anki 2.1.54+. Do not add a normal `Front;Back;Tags` row, which could be imported as a card. For older versions, remove metadata and map the separator/fields/tags manually
 - Tags field uses space-separated tags: topic slug, card type, difficulty
 - Escape any double quotes inside fields by doubling them (`""`)
 - No HTML — plain text only for maximum compatibility
@@ -145,10 +152,11 @@ After generating, display:
   Saved to:
     docs/flashcards-[slug].md
     docs/flashcards-[slug].csv
-    ~/.local/share/claude-education/docs/flashcards-[slug].md
-    ~/.local/share/claude-education/docs/flashcards-[slug].csv
+    <education-db>/docs/flashcards-[slug].md
+    <education-db>/docs/flashcards-[slug].csv
 
   Import CSV into Anki: File > Import > select the .csv file
+  Preview: Front → Front, Back → Back, column 3 → Tags; no header card
 ──────────────────────────────────────────
 ```
 
@@ -156,12 +164,12 @@ If generating for multiple topics, show a combined summary at the end with total
 
 ### 6. Update DB
 
-**Append to session log** `~/.local/share/claude-education/sessions/[date].jsonl`:
+**Append to session log** `<education-db>/sessions/[date].jsonl`:
 ```jsonl
 {"time": "[now]", "event": "flashcards", "topics": ["[slug1]", "[slug2]"], "total_cards": 15, "formats": ["markdown", "csv"]}
 ```
 
-**Update dashboard** `~/.local/share/claude-education/dashboard.json`:
+**Update dashboard** `<education-db>/dashboard.json`:
 - Update `last_session` to today
 
 ## Rules
@@ -171,12 +179,12 @@ If generating for multiple topics, show a combined summary at the end with total
 - **Prioritize weak areas.** The whole point is targeted review — weak topics and misconceptions come first.
 - **Keep cards atomic.** One concept per card. If a card needs more than 3 sentences on the back, split it.
 - **Respect student preferences.** Use their learning style, interests, and avoid their dislikes when crafting card language.
-- **Regeneration is safe.** Running `/flashcards [topic]` again overwrites the previous files for that topic — this is expected, as cards should reflect the latest knowledge state.
+- **Regeneration is safe.** Read existing files before regenerating; preserve student edits or save a new version. Keep existing fronts stable when updating answers so Anki can match notes.
 - **Create project-local `docs/` directory** if it doesn't exist before saving.
 
 ## Integration with Other Skills
 
-- **`/quiz-me [topic]`** — flashcards are for self-study; quizzes are for active testing. Suggest quizzing after reviewing flashcards.
-- **`/challenge [topic]`** — for hands-on practice after memorizing concepts via flashcards.
-- **`/progress`** — check which topics need flashcards most (weak areas, due reviews).
-- **`/save-progress`** — flashcard generation auto-logs to the session, but student can explicitly checkpoint.
+- **`/claude-teacher:quiz-me [topic]`** — flashcards are for self-study; quizzes are for active testing. Suggest quizzing after reviewing flashcards.
+- **`/claude-teacher:challenge [topic]`** — for hands-on practice after memorizing concepts via flashcards.
+- **`/claude-teacher:progress`** — check which topics need flashcards most (weak areas, due reviews).
+- **`/claude-teacher:save-progress`** — flashcard generation auto-logs to the session, but student can explicitly checkpoint.
